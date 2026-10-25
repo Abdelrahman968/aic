@@ -13,7 +13,15 @@
     REVIEW KEYS
       Enter commit | e edit in git editor | r retry | v pick from variants | h retry with a hint | m pick model
       t pick type  | s set scope | b toggle breaking "!" | x toggle gitmoji | a stage AI files | f re-pick files
-      c copy | p commit+push | d view diff | q / Esc quit
+      w AI review of the staged diff | c copy | p commit+push | d view diff | q / Esc quit
+
+    BUILT-IN CHECKS (no AI needed, shown under the diffstat)
+      leftover console.log / debugger / .only / TODO, merge conflict markers, files over 1 MB.
+      Conflict markers block -Yes and ask before a normal commit. Turn it all off with -NoLint or "lint": false.
+
+    AUTO REF
+      A ticket key (ABC-123) or issue number in the branch name (feat/ABC-123-login, 42-fix-header, issue-42)
+      becomes a "Refs:" footer automatically. Turn it off with -NoAutoRef or "autoRef": false.
 
     AI FILES (what counts as "related to AI")
       .aic.json, CLAUDE.md / AGENTS.md / GEMINI.md / COPILOT.md, .cursorrules, .windsurfrules, .clinerules, .aider*,
@@ -59,6 +67,20 @@
     aic -Theme dracula -Border double -Banner big -Spinner star
 .EXAMPLE
     $msg = aic -DryRun -PassThru          # message as a string (scripts / hooks)
+.EXAMPLE
+    aic -Review                           # local AI review of the staged diff (advisory), then exit
+.EXAMPLE
+    aic -Pr -Into main                    # PR title + markdown description from the commits on this branch
+.EXAMPLE
+    aic -Changelog -Since v1.2.0          # changelog grouped by commit type
+.EXAMPLE
+    aic -Bump -Push                       # suggest the next semver from your commits, tag it, push the tag
+.EXAMPLE
+    aic -Stats -Days 60                   # commit stats: sparkline, streak, top types and scopes
+.EXAMPLE
+    aic -NewBranch -AiFiles               # the model names a branch, you confirm, then the commit flow continues
+.EXAMPLE
+    aic -CoAuthor 'Jane Doe <jane@example.com>'
 
 .PARAMETER Model
     Ollama model. Tab-completes with the models you have installed.
@@ -160,6 +182,31 @@
     Keep colours, drop animations.
 .PARAMETER Plain
     ASCII only, no colour, no animation.
+.PARAMETER Review
+    Ask the local model to review the staged diff (bugs, risks, leftovers), print the notes and exit. Advisory only.
+.PARAMETER Pr
+    Write a pull-request title + markdown description from the commits and diff of the current branch.
+.PARAMETER Into
+    Target branch for -Pr (default: origin's default branch, else main / master / develop).
+.PARAMETER Changelog
+    Print a changelog grouped by commit type (breaking changes first). With -Copy it also goes to the clipboard.
+.PARAMETER Since
+    Starting ref for -Changelog (default: the latest tag, else the whole history).
+.PARAMETER Bump
+    Suggest the next semantic version from the commits since the last tag and offer to create the annotated tag.
+.PARAMETER Stats
+    Commit statistics: sparkline, streak, busiest day, top types and scopes.
+.PARAMETER Days
+    Window for -Stats, 1-365 (default 30). Above 42 days the sparkline switches to weekly bars.
+.PARAMETER NewBranch
+    Let the model name a branch for the staged changes (type/short-description), create it after you confirm,
+    then continue with the normal commit flow.
+.PARAMETER CoAuthor
+    Add a "Co-authored-by: Name <email>" footer.
+.PARAMETER NoLint
+    Skip the built-in leftover / conflict-marker / large-file checks.
+.PARAMETER NoAutoRef
+    Do not derive a "Refs:" footer from the branch name.
 
 .NOTES
     Defaults once, in $PROFILE:
@@ -167,7 +214,7 @@
         $PSDefaultParameterValues['aic:Theme']   = 'dracula'
     Per repo: run  aic -Init  and edit .aic.json
         (model, language, bullets, emoji, history, theme, spinner, border, banner, width,
-         scopes, exclude, aiFiles, autoStageAi)
+         scopes, exclude, aiFiles, autoStageAi, lint, autoRef, coAuthor)
     Same keys work in ~/.aic.json as personal defaults for every repo.
     "autoStageAi": true  = every run behaves like -AiFiles.
 #>
@@ -225,6 +272,18 @@ function aic {
         [switch]$Doctor,
         [ValidateRange(0, 100)][int]$Log = 0,
         [switch]$ListThemes,
+        [switch]$Review,
+        [switch]$Pr,
+        [string]$Into,
+        [switch]$Changelog,
+        [string]$Since,
+        [switch]$Bump,
+        [switch]$Stats,
+        [ValidateRange(1, 365)][int]$Days = 30,
+        [switch]$NewBranch,
+        [string]$CoAuthor,
+        [switch]$NoLint,
+        [switch]$NoAutoRef,
 
         [switch]$Yes,
         [switch]$DryRun,
@@ -289,6 +348,9 @@ function aic {
     if ($cfg['scopes']) { $cfgScopes = @($cfg['scopes'] | ForEach-Object { [string]$_ } | Where-Object { $_ }) }
     $aiGlobs = @(@($AiPattern) + @($cfg['aiFiles']) | ForEach-Object { [string]$_ } | Where-Object { $_ })
     $autoAi  = ($cfg['autoStageAi'] -eq $true)
+    $lintOn    = (-not $NoLint) -and ($cfg['lint'] -ne $false)
+    $autoRefOn = (-not $NoAutoRef) -and ($cfg['autoRef'] -ne $false)
+    if (-not $CoAuthor -and $cfg['coAuthor']) { $CoAuthor = [string]$cfg['coAuthor'] }
 
     # =========================================================================================
     # 1) terminal capabilities
@@ -456,7 +518,7 @@ function aic {
     function Draw-Spin([int]$n, [string]$label, [double]$secs, [int]$toks, [string]$tail) {
         if (-not $ui.Anim) { return }
         $meta = if ($toks -ge 0) { ' {0}s {1} {2} tok' -f (F1 $secs), $g.mid, $toks } else { ' {0}s' -f (F1 $secs) }
-        $bar  = if ($toks -ge 0) { ' ' + (Bar $toks $NumPredict 8) } else { '' }
+        $bar  = if ($toks -ge 0) { ' ' + (Bar $toks $np 8) } else { '' }
         $keys = if ($toks -ge 0 -and $ui.Keys) { " $($g.mid) esc to cancel" } else { '' }
         $room = (WinWidth) - 3 - (2 + 1 + $label.Length + $meta.Length + $bar.Length + $keys.Length) - 3
         $tailTxt = ''
@@ -484,7 +546,7 @@ function aic {
         if ($ui.Keys) {
             try { $k = [Console]::ReadKey($true); return @{ Key = "$($k.Key)"; Char = "$($k.KeyChar)".ToLower() } } catch { $ui.Keys = $false }
         }
-        $line = ([string](Read-Host '  action [Enter=commit e r v h m t s b x a f c p d q]')).Trim().ToLower()
+        $line = ([string](Read-Host '  action [Enter=commit e r v h m t s b x a f w c p d q]')).Trim().ToLower()
         @{ Key = $(if ($line -eq '') { 'Enter' } else { 'Other' }); Char = $(if ($line.Length) { $line.Substring(0, 1) } else { '' }) }
     }
 
@@ -739,6 +801,7 @@ function aic {
         }
         if ($Bullets -eq 0) { $bul.Clear() } elseif ($bul.Count -gt $Bullets) { $bul.RemoveRange($Bullets, $bul.Count - $Bullets) }
         if ($Ref -and -not ($foot | Where-Object { $_ -like "*$Ref*" })) { $foot.Add("Refs: $Ref") }
+        if ($CoAuthor -and -not ($foot | Where-Object { $_ -like 'Co-authored-by:*' })) { $foot.Add("Co-authored-by: $CoAuthor") }
         $out = $hdr
         if ($bul.Count)  { $out += "`n`n" + ($bul -join "`n") }
         if ($foot.Count) { $out += "`n`n" + ($foot -join "`n") }
@@ -885,15 +948,16 @@ function aic {
         [bool]($capCache[$name] -contains $cap)
     }
 
-    function Invoke-Generate([string]$ModelName, $Messages, [double]$Temp) {
+    function Invoke-Generate([string]$ModelName, $Messages, [double]$Temp, [int]$Predict = 0) {
+        $np = if ($Predict -gt 0) { $Predict } else { $NumPredict }          # review / PR text needs more room than a commit message
         $res = @{ Text = ''; Tokens = 0; Thought = 0; EvalCount = 0; EvalNs = 0; Seconds = 0.0; Cancelled = $false; Error = $null }
         [void]$used.Add($ModelName)
         # context window big enough for prompt + answer (code is roughly 2.8 chars per token)
         $chars   = ($Messages | ForEach-Object { $_.content.Length } | Measure-Object -Sum).Sum
-        $ctxSize = [Math]::Max($NumCtx, [int]([Math]::Ceiling(($chars / 2.8 + $NumPredict + 64) / 1024) * 1024))
+        $ctxSize = [Math]::Max($NumCtx, [int]([Math]::Ceiling(($chars / 2.8 + $np + 64) / 1024) * 1024))
         $payload = [ordered]@{
             model = $ModelName; stream = $true; keep_alive = $KeepAlive; messages = $Messages
-            options = @{ temperature = $Temp; num_ctx = $ctxSize; num_predict = $NumPredict }
+            options = @{ temperature = $Temp; num_ctx = $ctxSize; num_predict = $np }
         }
         # thinking models (qwen3, deepseek-r1 ...) would burn the whole token budget on reasoning: switch it off
         if (Test-Cap $ModelName 'thinking') { $payload['think'] = $false }
@@ -1082,6 +1146,7 @@ function aic {
         $aiTx = if ($aiN) { " $($g.mid) $aiN AI" } else { '' }
         CardBottom ("$($files.Count) file$(if ($files.Count -ne 1) { 's' }) $($g.mid) +$adds $($g.del)$dels$aiTx$more")
         foreach ($f in $st.Findings) { Warn "possible secret: $f" }
+        foreach ($n in $ctx.Lint.Notes) { Warn "check: $n" }
         $areas = @($files | ForEach-Object { Get-ScopeCandidate $_.Path } | Where-Object { $_ } | Select-Object -Unique).Count
         if ($files.Count -gt 15 -or $areas -ge 4) {
             Say ('  ' + (Paint "tip: $($files.Count) files across $areas areas - smaller commits read better (aic -Pick lets you choose)" 'dim'))
@@ -1114,7 +1179,7 @@ function aic {
 
     function Show-Actions {
         $items = @(('Enter', 'commit'), ('e', 'edit'), ('r', 'retry'), ('v', 'variants'), ('h', 'hint'), ('m', 'model'), ('t', 'type'), ('s', 'scope'),
-                   ('b', 'breaking'), ('x', 'emoji'), ('a', 'AI files'), ('f', 'files'), ('c', 'copy'), ('p', 'commit+push'), ('d', 'diff'), ('q', 'quit'))
+                   ('b', 'breaking'), ('x', 'emoji'), ('a', 'AI files'), ('f', 'files'), ('w', 'review'), ('c', 'copy'), ('p', 'commit+push'), ('d', 'diff'), ('q', 'quit'))
         $w = (WinWidth) - 4; $line = ''; $len = 0; $out = @()
         foreach ($a in $items) {
             $plainLen = $a[0].Length + 2 + 1 + $a[1].Length + 2
@@ -1208,6 +1273,335 @@ function aic {
         } else { Doc-Row 'bad' 'Ollama' "not reachable at $base" }
         Doc-Row $(if (Get-Command Set-Clipboard -ErrorAction SilentlyContinue) { 'ok' } else { 'warn' }) 'Clipboard' $(if (Get-Command Set-Clipboard -ErrorAction SilentlyContinue) { 'available' } else { 'Set-Clipboard missing (c key will not work)' })
         CardBottom "theme $Theme $($g.mid) border $Border $($g.mid) spinner $Spinner $($g.mid) banner $Banner"
+    }
+
+    # =========================================================================================
+    # 5b) extra tools: lint, review, PR text, changelog, semver bump, stats, branch names
+    # =========================================================================================
+    # word-wrap helper: Wrap-Text 'long text' 60 -> array of lines
+    function Wrap-Text([string]$t, [int]$w) {
+        $out = [System.Collections.Generic.List[string]]::new(); $cur = ''
+        foreach ($word in ($t -split '\s+')) {
+            if (-not $word) { continue }
+            if ($cur -and ($cur.Length + $word.Length + 1) -gt $w) { $out.Add($cur); $cur = $word }
+            else { $cur = if ($cur) { "$cur $word" } else { $word } }
+        }
+        if ($cur) { $out.Add($cur) }
+        $out.ToArray()
+    }
+
+    # pathspecs that hide lockfiles / minified / generated files from the model
+    function Get-PathArgs {
+        $skip = @('package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb', 'Cargo.lock',
+                  'composer.lock', 'poetry.lock', 'Gemfile.lock', 'go.sum', '*.min.js', '*.min.css', '*.map') + @($Exclude)
+        @('--', '.') + @($skip | Where-Object { $_ } | ForEach-Object { ":(exclude)*$_" })
+    }
+
+    # origin's default branch (origin/main), else the first of main / master / develop that exists
+    function Get-DefaultBase {
+        $h = [string](git @gitC symbolic-ref --short -q refs/remotes/origin/HEAD 2>$null)
+        if ($h) { return $h }
+        foreach ($c in 'main', 'master', 'develop') {
+            git @gitC rev-parse --verify -q $c 2>$null | Out-Null
+            if ($LASTEXITCODE -eq 0) { return $c }
+        }
+        ''
+    }
+
+    # static checks on the ADDED lines of the staged diff (no AI): leftovers, conflict markers, big files
+    function Find-Leftovers([string]$diffText) {
+        $notes = [ordered]@{}; $blocking = $false; $file = ''
+        $jsExt = '\.(js|jsx|ts|tsx|mjs|cjs|vue|svelte)$'
+        foreach ($line in ($diffText -split "`n")) {
+            if ($line.StartsWith('diff --git ')) {
+                $m = [regex]::Match($line, ' b/(.+?)\r?$')
+                $file = if ($m.Success) { $m.Groups[1].Value } else { '' }
+                continue
+            }
+            if (-not $line.StartsWith('+') -or $line.StartsWith('+++')) { continue }
+            $add = $line.Substring(1); $kind = ''
+            if ($add -match '^(<{7} |={7}\s*$|>{7} )') { $kind = 'merge conflict marker'; $blocking = $true }
+            elseif ($file -match $jsExt -and $add -match '\bconsole\.(log|debug)\(') { $kind = 'console.log' }
+            elseif ($file -match $jsExt -and $add -match '\bdebugger\b') { $kind = 'debugger statement' }
+            elseif ($add -match '\b(describe|it|test)\.only\(') { $kind = 'focused test (.only)' }
+            elseif ($file -notmatch '\.(md|mdx|txt)$' -and $add -match '\b(TODO|FIXME|XXX|HACK)\b') { $kind = 'TODO / FIXME' }
+            if ($kind) { $key = "$file - $kind"; $notes[$key] = 1 + [int]$notes[$key] }
+        }
+        $out = [System.Collections.Generic.List[string]]::new()
+        foreach ($k in $notes.Keys) { $out.Add($(if ($notes[$k] -gt 1) { "$k (x$($notes[$k]))" } else { $k })) }
+        # files over 1 MB in the index (sizes come from one `git cat-file --batch-check` call)
+        try {
+            $raw   = @(git @gitC diff --staged --raw --no-abbrev --no-ext-diff 2>$null)
+            $pairs = @(foreach ($r in $raw) { if ($r -match '^:\d+ \d+ [0-9a-f]+ ([0-9a-f]{40,64}) [AM]\t(.+)$') { "$($Matches[1]) $($Matches[2])" } })
+            if ($pairs.Count -gt 0 -and $pairs.Count -le 500) {
+                foreach ($l in @($pairs | git @gitC cat-file '--batch-check=%(objectsize) %(rest)' 2>$null)) {
+                    $sp = ([string]$l).Split(' ', 2)
+                    if ($sp.Count -eq 2 -and $sp[0] -match '^\d+$' -and [double]$sp[0] -gt 1MB) { $out.Add("$($sp[1]) - large file ($(F1 ([double]$sp[0] / 1MB)) MB)") }
+                }
+            }
+        } catch { }
+        return @{ Notes = $out.ToArray(); Blocking = $blocking }
+    }
+
+    # the w key / -Review: advisory review of the staged diff by the local model
+    function Invoke-Review {
+        $repo = $ctx.Repo
+        $sys = @('You are a careful senior code reviewer.',
+                 'Review ONLY the staged diff you are given. Output at most 5 short bullets ("- ") about real problems: bugs, missing error handling, security risks, leftover debug code, unclear naming.',
+                 'Start every bullet with the file name. Do not praise, do not summarise, do not invent code that is not in the diff.',
+                 'If you find no problems output exactly one bullet: - no problems found') -join "`n"
+        if ($Language -notmatch '^(en|english)$') { $sys += "`nWrite the bullets in $Language." }
+        $usr = "Files changed:`n$($repo.Stat)`n`nDiff:`n$($repo.Diff)"
+        if ($st.Model -match 'qwen3') { $usr += "`n/no_think" }
+        $msgs = @(@{ role = 'system'; content = $sys }, @{ role = 'user'; content = $usr })
+        $gen = Invoke-Generate $st.Model $msgs 0.2 400
+        if ($gen.Cancelled) { Say ('  ' + (Paint 'review cancelled' 'warn')); return }
+        if ($gen.Error)     { Fail 'Review failed' $gen.Error; return }
+        $text = (($gen.Text -replace '(?s)<think>.*?</think>', '').Trim() -replace '(?m)^\s*[\*\u2022]\s+', '- ')
+        Say ''
+        CardTop 'AI review' (Pill 'advisory' $aiRgb)
+        $shown = 0
+        foreach ($l in @($text -split '\r?\n')) {
+            $t = ($l.Trim() -replace '^-\s*', '')
+            if (-not $t) { continue }
+            $col = if ($t -match '^no problems found') { 'ok' } else { 'text' }
+            $wrapped = @(Wrap-Text $t ((RuleWidth) - 8))
+            for ($i = 0; $i -lt $wrapped.Count; $i++) {
+                Rail ($(if ($i -eq 0) { (Paint '-' 'warn') + ' ' } else { '  ' }) + (Paint $wrapped[$i] $col))
+            }
+            $shown++
+        }
+        if ($shown -eq 0) { Rail (Paint 'the model returned nothing useful, press w to try again' 'mute') }
+        CardBottom "local model $($g.mid) advisory only, verify before you rely on it $($g.mid) $(F1 $gen.Seconds)s"
+    }
+
+    # -Pr: title + markdown description for everything on this branch that is not in the target branch yet
+    function Invoke-Pr {
+        $target = if ($Into) { $Into } else { Get-DefaultBase }
+        if (-not $target) { Fail 'Could not find a base branch.' 'Pass it with -Into main.'; return }
+        git @gitC rev-parse --verify -q $target 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { Fail "Base branch '$target' does not exist." 'Pass another one with -Into.'; return }
+        $subjects = @(git @gitC log "$target..HEAD" --no-merges --pretty=%s 2>$null | Where-Object { $_ })
+        if ($subjects.Count -eq 0) { Warn "No commits on $branch compared with $target."; return }
+        $statLines = @(git @gitC diff "$target...HEAD" --numstat --no-ext-diff @pathArgs 2>$null) | Select-Object -First 40 |
+            ForEach-Object { $p = ([string]$_) -split "`t", 3; if ($p.Count -ge 3) { "$($p[2]) (+$($p[0]) -$($p[1]))" } }
+        $diff = Shrink-Diff ((git @gitC diff "$target...HEAD" --unified=1 --no-color --no-ext-diff @pathArgs) -join "`n") $MaxChars
+        $sys = @('You write pull request descriptions for code review.',
+                 'Line 1 is the PR title in Conventional Commits style: type(scope): subject, lowercase, no trailing period, max 72 characters.',
+                 'Then a blank line, then Markdown with exactly these sections: "## Summary" (2 to 3 sentences), "## Changes" (short bullets, grouped by area), "## Testing" (bullets, ONLY what can be inferred from the diff; omit the section if nothing can be inferred).',
+                 'Describe only what is visible in the commits and the diff. Never invent details.',
+                 'Output only the PR text: no fences, no preamble.') -join "`n"
+        if ($Language -notmatch '^(en|english)$') { $sys += "`nWrite the text in $Language. Keep the title type and scope in English." }
+        $listed = (($subjects | Select-Object -First 60) | ForEach-Object { "- $_" }) -join "`n"
+        $usr = "Branch: $branch -> $target`nCommits:`n$listed`n`nFiles changed:`n$($statLines -join "`n")`n`nDiff:`n$diff"
+        if ($Model -match 'qwen3') { $usr += "`n/no_think" }
+        $msgs = @(@{ role = 'system'; content = $sys }, @{ role = 'user'; content = $usr })
+        $gen = Invoke-Generate $Model $msgs 0.3 700
+        if ($gen.Cancelled) { Say ('  ' + (Paint 'cancelled' 'warn')); return }
+        if ($gen.Error)     { Fail 'Generation failed' $gen.Error; return }
+        $text = ($gen.Text -replace '(?s)<think>.*?</think>', '' -replace '(?s)<think>.*$', '').Trim()
+        $text = ($text -replace '^\x60{3}[A-Za-z]*\s*', '' -replace '\s*\x60{3}\s*$', '').Trim()
+        if (-not $text) { Fail 'The model returned an empty description' 'Try again or pick another -Model.'; return }
+        $lines = @($text -split '\r?\n')
+        $title = (($lines[0]).Trim($trimChars) -replace '^#+\s*', '')
+        $body  = if ($lines.Count -gt 1) { @($lines[1..($lines.Count - 1)]) } else { @() }
+        Say ''
+        CardTop 'Pull request' (Paint "$branch $($g.sel) $target" 'scope')
+        Say ('  ' + (Paint $g.v 'dim') + ' ') -NoNewline
+        Say (Format-Line $title $true)
+        foreach ($l in $body) {
+            if     ($l -match '^#{1,3}\s+(.*)$')     { Rail (Paint $Matches[1] 'accentb') }
+            elseif ($l -match '^\s*[-*]\s+(.*)$')    { Rail ((Paint '-' 'dim') + ' ' + (Paint $Matches[1] 'text')) }
+            elseif ($l.Trim())                        { Rail (Paint $l.Trim() 'mute') }
+            else                                      { Rail '' }
+        }
+        CardBottom "$($subjects.Count) commit$(if ($subjects.Count -ne 1) { 's' }) $($g.mid) $(F1 $gen.Seconds)s $($g.mid) $Model"
+        $full = $title + "`n`n" + (($body -join "`n").Trim())
+        if ($Copy -or ($ui.Keys -and (Confirm-Key 'Copy it to the clipboard?' $true))) {
+            try { Set-Clipboard -Value $full; Say ('  ' + (Paint "$($g.ok) copied to clipboard" 'ok')) } catch { Fail 'Clipboard is not available here.' }
+        }
+        if ($PassThru) { $full }
+    }
+
+    # -Changelog: markdown grouped by commit type; returns the text
+    function Show-Changelog {
+        $from = $Since
+        if (-not $from) {
+            $from = [string](git @gitC describe --tags --abbrev=0 2>$null)
+            if ($LASTEXITCODE -ne 0) { $from = '' }
+        }
+        $range = if ($from) { "$from..HEAD" } else { 'HEAD' }
+        $rows  = @(git @gitC log $range --no-merges '--format=%h%x09%s' 2>$null | Where-Object { $_ })
+        if ($rows.Count -eq 0) { Warn "No commits found in $range."; return '' }
+        $titles = [ordered]@{ breaking = 'Breaking changes'; feat = 'Features'; fix = 'Bug fixes'; perf = 'Performance'; refactor = 'Refactoring'
+                              docs = 'Documentation'; test = 'Tests'; build = 'Build'; ci = 'CI'; style = 'Style'; chore = 'Chores'; revert = 'Reverts'; other = 'Other changes' }
+        $items = @{}
+        foreach ($k in $titles.Keys) { $items[$k] = [System.Collections.Generic.List[string]]::new() }
+        foreach ($r in $rows) {
+            $p = ([string]$r) -split "`t", 2
+            $m = [regex]::Match($p[1], $rxParse)
+            $t = if ($m.Success) { $m.Groups['type'].Value.ToLower() } else { '' }
+            if ($t -and $typeRgb.ContainsKey($t)) {
+                $sc   = if ($m.Groups['scope'].Success -and $m.Groups['scope'].Value) { $m.Groups['scope'].Value + ': ' } else { '' }
+                $subj = ($m.Groups['subj'].Value -replace $rxEmoji, '').Trim()
+                $item = "$sc$subj ($($p[0]))"
+                if ($m.Groups['bang'].Success) { $items['breaking'].Add($item) } else { $items[$t].Add($item) }
+            } else { $items['other'].Add("$($p[1]) ($($p[0]))") }
+        }
+        $heading = if ($from) { "## Changes since $from" } else { '## Changelog' }
+        $md = [System.Collections.Generic.List[string]]::new()
+        $md.Add($heading)
+        foreach ($k in $titles.Keys) {
+            if ($items[$k].Count -eq 0) { continue }
+            $md.Add(''); $md.Add("### $($titles[$k])")
+            foreach ($i in $items[$k]) { $md.Add("- $i") }
+        }
+        Say ''
+        foreach ($l in $md) {
+            if     ($l.StartsWith('### ')) { Say ('  ' + (Paint $l.Substring(4) 'accentb')) }
+            elseif ($l.StartsWith('## '))  { Say ('  ' + (Gradient $l.Substring(3) $th.g1 $th.g2)) }
+            elseif ($l.StartsWith('- '))   { Say ('  ' + (Paint '-' 'dim') + ' ' + (Paint $l.Substring(2) 'text')) }
+            else                            { Say '' }
+        }
+        $text = $md -join "`n"
+        if ($Copy) { try { Set-Clipboard -Value $text; Say ''; Say ('  ' + (Paint "$($g.ok) copied to clipboard" 'ok')) } catch { Fail 'Clipboard is not available here.' } }
+        return $text
+    }
+
+    # -Bump: next semantic version from the commits since the last tag, optionally tag it
+    function Invoke-Bump {
+        $last = [string](git @gitC describe --tags --abbrev=0 2>$null)
+        if ($LASTEXITCODE -ne 0) { $last = '' }
+        $maj = 0; $min = 0; $pat = 0; $prefix = 'v'
+        if ($last) {
+            $m = [regex]::Match($last, '^(?<p>v?)(?<a>\d+)\.(?<b>\d+)\.(?<c>\d+)')
+            if (-not $m.Success) { Fail "The last tag '$last' is not a semantic version (x.y.z)."; return }
+            $prefix = $m.Groups['p'].Value
+            $maj = [int]$m.Groups['a'].Value; $min = [int]$m.Groups['b'].Value; $pat = [int]$m.Groups['c'].Value
+        }
+        $range = if ($last) { "$last..HEAD" } else { 'HEAD' }
+        $subjects = @(git @gitC log $range --no-merges '--format=%s' 2>$null | Where-Object { $_ })
+        if ($subjects.Count -eq 0) { Warn "No commits since $last, nothing to release."; return }
+        $brk  = @($subjects | Where-Object { $_ -match '^[A-Za-z]+(\([^)]*\))?!:' }).Count
+        $brk += @(git @gitC log $range --no-merges --grep='BREAKING CHANGE' --format=%h 2>$null | Where-Object { $_ }).Count
+        $feat = @($subjects | Where-Object { $_ -match '^feat(\(|!|:)' }).Count
+        $fix  = @($subjects | Where-Object { $_ -match '^(fix|perf)(\(|!|:)' }).Count
+        $level = if ($brk -gt 0) { 'major' } elseif ($feat -gt 0) { 'minor' } else { 'patch' }
+        switch ($level) { 'major' { $maj++; $min = 0; $pat = 0 } 'minor' { $min++; $pat = 0 } default { $pat++ } }
+        $next = "${prefix}${maj}.${min}.${pat}"
+        Say ''
+        CardTop 'Release bump' (Paint $(if ($last) { $last } else { 'no tag yet' }) 'scope')
+        Rail ((Paint 'commits'.PadRight(10) 'mute') + $subjects.Count)
+        Rail ((Paint 'features'.PadRight(10) 'mute') + (Paint "$feat" 'ok'))
+        Rail ((Paint 'fixes'.PadRight(10) 'mute') + (Paint "$fix" 'warn'))
+        Rail ((Paint 'breaking'.PadRight(10) 'mute') + (Paint "$brk" $(if ($brk) { 'err' } else { 'dim' })))
+        CardBottom "$level bump $($g.sel) $next"
+        git @gitC rev-parse -q --verify "refs/tags/$next" 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { Fail "Tag $next already exists."; return }
+        if (-not $Yes -and -not (Confirm-Key "Create annotated tag $next on HEAD?" $false)) { Say ('  ' + (Paint 'no tag created' 'mute')); return }
+        git @gitC tag -a $next -m "Release $next" 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { Fail 'git tag failed'; return }
+        Say ('  ' + (Paint "$($g.ok) created tag $next" 'ok'))
+        if ($Push) {
+            git @gitC push origin $next 2>&1 | Out-Host
+            if ($LASTEXITCODE -eq 0) { Say ('  ' + (Paint "$($g.ok) pushed $next" 'ok')) } else { Fail 'git push failed' 'See the git output above.' }
+        }
+    }
+
+    # -Stats: how you have been committing lately
+    function Show-Stats([int]$d) {
+        $from = (Get-Date).AddDays(-$d).ToString('yyyy-MM-dd', $inv)
+        $rows = @(git @gitC log "--since=$from" --no-merges '--format=%ad%x09%an%x09%s' --date=short 2>$null | Where-Object { $_ })
+        if ($rows.Count -eq 0) { Warn "No commits in the last $d days."; return }
+        $byDay = @{}; $tc = @{}; $sc = @{}; $who = @{}
+        foreach ($r in $rows) {
+            $p = ([string]$r) -split "`t", 3
+            $byDay[$p[0]] = 1 + [int]$byDay[$p[0]]
+            if ($p.Count -ge 2) { $who[$p[1]] = 1 + [int]$who[$p[1]] }
+            if ($p.Count -ge 3) {
+                $m = [regex]::Match($p[2], $rxParse)
+                if ($m.Success) {
+                    $t = $m.Groups['type'].Value.ToLower()
+                    if ($typeRgb.ContainsKey($t)) { $tc[$t] = 1 + [int]$tc[$t] }
+                    $s = $m.Groups['scope'].Value
+                    if ($s) { $sc[$s] = 1 + [int]$sc[$s] }
+                }
+            }
+        }
+        # sparkline: one bar per day (up to 42 days), otherwise one bar per week
+        $glyph = if ($ui.Plain) { @(' ', '.', ':', '-', '=', '+', '*', '#') } else { @(0x2581..0x2588 | ForEach-Object { U $_ }) }
+        $zero  = if ($ui.Plain) { '.' } else { $glyph[0] }
+        $series = @()
+        if ($d -le 42) {
+            for ($i = $d - 1; $i -ge 0; $i--) { $series += [int]$byDay[(Get-Date).AddDays(-$i).ToString('yyyy-MM-dd', $inv)] }
+        } else {
+            $nb = [int][Math]::Ceiling($d / 7)
+            for ($b = $nb - 1; $b -ge 0; $b--) {
+                $sum = 0
+                for ($i = $b * 7; ($i -lt $b * 7 + 7) -and ($i -lt $d); $i++) { $sum += [int]$byDay[(Get-Date).AddDays(-$i).ToString('yyyy-MM-dd', $inv)] }
+                $series += $sum
+            }
+        }
+        $max = [Math]::Max(1, [int](($series | Measure-Object -Maximum).Maximum))
+        $spark = -join ($series | ForEach-Object {
+            if ($_ -le 0) { Paint $zero 'dim' } else { Paint $glyph[[Math]::Min(7, [int][Math]::Ceiling(7 * $_ / $max))] 'accent' }
+        })
+        # current streak (today may still be empty)
+        $streak = 0
+        for ($i = 0; $i -le $d; $i++) {
+            if ($byDay.ContainsKey((Get-Date).AddDays(-$i).ToString('yyyy-MM-dd', $inv))) { $streak++ }
+            elseif ($i -eq 0) { continue }
+            else { break }
+        }
+        $busy = $byDay.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 1
+        Say ''
+        CardTop "Commit stats $($g.mid) last $d days" (Paint $branch 'scope')
+        Rail ((Paint 'commits'.PadRight(9) 'mute') + (Paint "$($rows.Count)" 'text') + (Paint " on $($byDay.Count) active day$(if ($byDay.Count -ne 1) { 's' })" 'dim'))
+        Rail ((Paint 'rhythm'.PadRight(9) 'mute') + $spark + (Paint $(if ($d -gt 42) { '  1 bar = 1 week' } else { '  1 bar = 1 day' }) 'dim'))
+        Rail ((Paint 'streak'.PadRight(9) 'mute') + (Paint "$streak day$(if ($streak -ne 1) { 's' })" 'ok') + (Paint "  $($g.mid) busiest $($busy.Key) ($($busy.Value))" 'dim'))
+        if ($tc.Count) {
+            $hist = (($tc.Keys | Sort-Object { -$tc[$_] }, { $_ }) | ForEach-Object { Paint "$_ $($tc[$_])" "38;2;$($typeRgb[$_])" }) -join (Paint " $($g.mid) " 'dim')
+            Rail ((Paint 'types'.PadRight(9) 'mute') + $hist)
+        }
+        if ($sc.Count) {
+            $top = (($sc.Keys | Sort-Object { -$sc[$_] }, { $_ }) | Select-Object -First 5 | ForEach-Object { Paint "$_ $($sc[$_])" 'scope' }) -join (Paint " $($g.mid) " 'dim')
+            Rail ((Paint 'scopes'.PadRight(9) 'mute') + $top)
+        }
+        if ($who.Count -gt 1) {
+            $team = (($who.Keys | Sort-Object { -$who[$_] }, { $_ }) | Select-Object -First 3 | ForEach-Object { "$_ $($who[$_])" }) -join " $($g.mid) "
+            Rail ((Paint 'authors'.PadRight(9) 'mute') + (Paint $team 'text'))
+        }
+        CardBottom "$([Math]::Round($rows.Count / [Math]::Max(1, $d), 1).ToString('0.0', $inv)) commits per day on average"
+    }
+
+    # -NewBranch: the model names a branch for the staged changes; returns the new name ('' = nothing created)
+    function Invoke-NewBranch {
+        $repo = $ctx.Repo
+        $sys = @('You name git branches.',
+                 'Output ONLY one branch name: lowercase, words separated by hyphens, 2 to 5 words after the prefix, format type/short-description.',
+                 'type is one of: feat, fix, refactor, perf, docs, test, build, ci, chore.',
+                 'Describe only what is visible in the diff. No quotes, no explanation.') -join "`n"
+        $usr = "Current branch: $($repo.Branch)`nFiles changed:`n$($repo.Stat)`n`nDiff:`n$($repo.Diff)"
+        if ($st.Model -match 'qwen3') { $usr += "`n/no_think" }
+        $msgs = @(@{ role = 'system'; content = $sys }, @{ role = 'user'; content = $usr })
+        $gen = Invoke-Generate $st.Model $msgs 0.3 40
+        if ($gen.Cancelled) { Say ('  ' + (Paint 'cancelled' 'warn')); return '' }
+        if ($gen.Error)     { Fail 'Generation failed' $gen.Error; return '' }
+        $first = (($gen.Text -replace '(?s)<think>.*?</think>', '').Trim() -split '\r?\n')[0]
+        $name  = ([string]$first).ToLower().Trim($trimChars) -replace '[\s_]+', '-' -replace '[^a-z0-9/._-]', '' -replace '-{2,}', '-' -replace '/{2,}', '/'
+        $name  = $name.Trim([char[]]'-/.')
+        if (-not $name) { Fail 'The model did not return a usable branch name.'; return '' }
+        git check-ref-format --branch $name 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { Fail "'$name' is not a valid branch name."; return '' }
+        git @gitC rev-parse --verify -q "refs/heads/$name" 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { $name = "$name-2" }
+        Say ''
+        Say ('  ' + (Paint "branch $($g.sel) " 'mute') + (Paint $name 'accentb'))
+        if ($ui.Keys -and -not $Yes -and -not (Confirm-Key 'Create it and switch to it? Your staged changes come along.' $true)) { Say ('  ' + (Paint 'no branch created' 'mute')); return '' }
+        git @gitC switch -c $name 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) { Fail 'git switch -c failed'; return '' }
+        Say ('  ' + (Paint "$($g.ok) switched to $name" 'ok'))
+        return $name
     }
 
     # =========================================================================================
@@ -1326,6 +1720,7 @@ function aic {
         })
         $ctx.Files = $list
         $ctx.PendingAi = 0
+        $ctx.Lint = @{ Notes = @(); Blocking = $false }
         if ($list.Count -eq 0) { return 0 }
         $diffText = (git @gitC diff --staged --unified=1 --no-color --no-ext-diff @baseArgs @pathArgs) -join "`n"
         $statText = (($list | Select-Object -First 40 | ForEach-Object { if ($_.Bin) { "$($_.Path) (binary)" } else { "$($_.Path) (+$($_.Add) -$($_.Del))" } }) -join "`n")
@@ -1346,6 +1741,7 @@ function aic {
         $find = @()
         if (-not $NoScan) { $find = Find-Secrets @($list | ForEach-Object { $_.Path }) $diffText }
         $st.Findings = $find
+        if ($lintOn) { $ctx.Lint = Find-Leftovers $diffText }
         $ctx.PendingAi = @(Get-Changes | Where-Object { $_.Ai -and (-not $_.Staged -or $_.Dirty) }).Count
         return $list.Count
     }
@@ -1354,10 +1750,10 @@ function aic {
     # 7) main
     # =========================================================================================
     $oldTitle = $null; $oldEnc = $null; $base = $null; $uri = $null
-    $inRepo = $false; $root = ''; $branch = ''; $gitC = @(); $baseArgs = @(); $pathArgs = @()
+    $inRepo = $false; $root = ''; $branch = ''; $gitC = @(); $baseArgs = @(); $pathArgs = @(); $refNote = ''
     $used = [System.Collections.Generic.HashSet[string]]::new()
     $st   = @{ Findings = @(); CommitOk = $false }
-    $ctx  = @{ Files = @(); Repo = @{ AiPaths = @(); AllAi = $false }; PendingAi = 0 }
+    $ctx  = @{ Files = @(); Repo = @{ AiPaths = @(); AllAi = $false }; PendingAi = 0; Lint = @{ Notes = @(); Blocking = $false } }
     if ($ui.Fancy) { try { $oldTitle = $Host.UI.RawUI.WindowTitle } catch { } }
     try {
         Show-Header
@@ -1372,8 +1768,16 @@ function aic {
         if (-not $inRepo -and -not $Doctor) { Fail 'Not inside a git repository.'; return }
         if ($inRepo) {
             $gitC = '-C', $root, '-c', 'core.quotepath=false'
+            $pathArgs = Get-PathArgs                                         # lockfiles / minified / generated files stay out of the prompt
             $branch = git @gitC symbolic-ref --short -q HEAD 2>$null
             if (-not $branch) { $branch = 'detached HEAD' }
+            # auto "Refs:" footer from the branch name: ABC-123 (upper case), 42-fix-x, issue-42
+            if ($autoRefOn -and -not $Ref) {
+                if     ($branch -cmatch '(?:^|[/_-])([A-Z][A-Z0-9]+-\d+)') { $Ref = $Matches[1] }
+                elseif ($branch -match  '(?:^|/)(\d{1,6})[-_]')           { $Ref = "#$($Matches[1])" }
+                elseif ($branch -match  '(?:issue|gh|pr)[-_#]?(\d{1,6})') { $Ref = "#$($Matches[1])" }
+                if ($Ref) { $refNote = "ref $Ref (from the branch name)" }
+            }
         }
 
         # Ollama address (OLLAMA_HOST may be ":11434", "0.0.0.0:11434", "host:port" ...)
@@ -1385,6 +1789,9 @@ function aic {
 
         if ($Doctor) { Show-Doctor; return }
         if ($Log -gt 0) { Show-Log $Log; return }
+        if ($Stats)     { Show-Stats $Days; return }
+        if ($Changelog) { $cl = Show-Changelog; if ($PassThru -and $cl) { $cl }; return }
+        if ($Bump)      { Invoke-Bump; return }
 
         # ---- write a starter .aic.json -------------------------------------------------------------------
         if ($Init) {
@@ -1395,7 +1802,7 @@ function aic {
             $starter = [ordered]@{
                 model = $Model; language = 'English'; bullets = 3; history = 3; emoji = $false
                 theme = $Theme; spinner = $Spinner; border = $Border; banner = $Banner; width = $Width
-                scopes = $cand; exclude = @(); aiFiles = @('prompts/*', '*.prompt.md'); autoStageAi = $false
+                scopes = $cand; exclude = @(); aiFiles = @('prompts/*', '*.prompt.md'); autoStageAi = $false; lint = $true; autoRef = $true
             }
             [System.IO.File]::WriteAllText($cfgPath, ($starter | ConvertTo-Json), [System.Text.UTF8Encoding]::new($false))
             Say ''
@@ -1480,6 +1887,8 @@ function aic {
         $Model = $want
         if ((Test-Cap $Model 'embedding') -and -not (Test-Cap $Model 'completion')) { Fail "'$Model' is an embedding model and cannot write text."; return }
         Say ('  ' + (Paint $g.dot 'ok') + ' ' + (Paint "ollama $($g.mid) $($uri.Authority) $($g.mid) $Model" 'mute'))
+        if ($refNote -and -not $Pr) { Say ('  ' + (Paint $g.dot 'dim') + ' ' + (Paint $refNote 'mute')) }
+        if ($Pr) { Invoke-Pr; return }
 
         # ---- which files? -All / AI files / checklist, then collect everything ---------------------------
         if ($All) { git @gitC add -A }
@@ -1498,10 +1907,7 @@ function aic {
             git @gitC rev-parse --verify -q 'HEAD~1' 2>$null | Out-Null
             $baseArgs = @(if ($LASTEXITCODE -eq 0) { 'HEAD~1' } else { '4b825dc642cb6eb9a060e54bf8d69288fbee4904' })
         }
-        # lockfiles / minified / generated files are noise for the model
-        $skipNames = @('package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb', 'Cargo.lock',
-                       'composer.lock', 'poetry.lock', 'Gemfile.lock', 'go.sum', '*.min.js', '*.min.css', '*.map') + @($Exclude)
-        $pathArgs = @('--', '.') + @($skipNames | Where-Object { $_ } | ForEach-Object { ":(exclude)*$_" })
+        # lockfiles / minified / generated files are excluded through $pathArgs (Get-PathArgs, set above)
 
         # ---- state shared by the whole session -----------------------------------------------------------
         $st = @{
@@ -1515,6 +1921,11 @@ function aic {
         }
         Say ''
         Show-Stat
+        if ($NewBranch) {                                                    # name + create a branch first, then carry on with the commit
+            $nb = Invoke-NewBranch
+            if ($nb) { $branch = $nb; $ctx.Repo.Branch = $nb }
+        }
+        if ($Review) { Invoke-Review; return }
 
         # ---- generate -> review -> commit ----------------------------------------------------------------
         $need = $true
@@ -1536,6 +1947,7 @@ function aic {
                 return
             }
             if ($Yes) {
+                if ($ctx.Lint.Blocking) { Fail 'Merge conflict markers are staged, so -Yes will not commit.' 'Resolve them, or commit interactively.'; return }
                 if ($st.Findings.Count) { Fail 'Possible secrets are staged, so -Yes will not commit.' 'Review the warnings above, or re-run with -NoScan if they are false alarms.'; return }
                 if ($st.Problems.Count -eq 0) {
                     Do-Commit $st.Msg $false
@@ -1550,6 +1962,10 @@ function aic {
             $key = if ($k.Key -eq 'Enter') { 'y' } elseif ($k.Key -eq 'Escape') { 'q' } else { "$($k.Char)" }
             switch ($key) {
                 { $_ -in 'y', 'e', 'p' } {
+                    if ($ctx.Lint.Blocking -and -not $st.AckLint) {
+                        if (-not (Confirm-Key 'Merge conflict markers are staged. Commit anyway?' $false)) { break }
+                        $st.AckLint = $true
+                    }
                     if ($st.Findings.Count -and -not $st.Ack) {
                         if (-not (Confirm-Key 'Possible secrets are staged. Commit anyway?' $false)) { break }
                         $st.Ack = $true
@@ -1631,6 +2047,7 @@ function aic {
                 'c' {
                     try { Set-Clipboard -Value $st.Msg; Say ('  ' + (Paint "$($g.ok) copied to clipboard" 'ok')) } catch { Fail 'Clipboard is not available here.' }
                 }
+                'w' { Invoke-Review }                                        # advisory review of the staged diff
                 'd' { Invoke-GitUi diff --staged --no-ext-diff @baseArgs @pathArgs }
                 'q' { Say ('  ' + (Paint 'cancelled' 'mute')); return }
                 default { }
