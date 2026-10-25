@@ -29,6 +29,10 @@ Stage → `aic` → review with one key → commit. Nothing leaves your machine.
 - **Message variants** — generate several alternatives and choose with the arrow keys.
 - **Live UI** — spinner, token progress bar, colour-coded diffstat, subject-length gauge, type pills.
 - **Secret scan** — warns about `.env` files, private keys, tokens and database URLs before you commit.
+- **Built-in checks** — flags leftover `console.log`, `debugger`, `.only`, `TODO`, merge-conflict markers and files over 1 MB (no AI involved).
+- **AI review** — press `w` for a quick, advisory review of the staged diff by your local model.
+- **Beyond commits** — PR descriptions (`-Pr`), changelogs (`-Changelog`), semver bumps + tags (`-Bump`), branch names (`-NewBranch`) and commit stats (`-Stats`).
+- **Auto refs** — `feat/ABC-123-login` automatically adds `Refs: ABC-123`.
 - **Customisable** — 10 themes, 8 spinners, 4 border styles, 3 banners, per-repo and global settings.
 - **Extras** — `-Undo`, `-Amend`, `-Push`, `-Doctor`, `-Log`, gitmoji, Arabic/any-language messages.
 
@@ -140,6 +144,7 @@ Make it automatic per repo with `"autoStageAi": true` in `.aic.json`.
 | `x` | toggle gitmoji |
 | `a` | stage AI files and regenerate |
 | `f` | re-pick files and regenerate |
+| `w` | advisory AI review of the staged diff |
 | `c` | copy message to clipboard |
 | `p` | commit and push |
 | `d` | view the staged diff |
@@ -147,6 +152,27 @@ Make it automatic per repo with `"autoStageAi": true` in `.aic.json`.
 
 `Esc` during generation cancels it (the previous message is kept).
 In pickers: `↑`/`↓` or `j`/`k`, `Home`/`End`, `Enter`, `Esc`. In the checklist: `Space` toggle, `a` all, `n` none, `i` AI files.
+
+---
+
+## 🧰 More tools
+
+| Command | What it does |
+|---|---|
+| `aic -Review` | local model reviews the staged diff (bugs, risks, leftovers) and exits. Advisory only. |
+| `aic -Pr -Into main` | PR title + markdown description (Summary / Changes / Testing) from the commits on your branch. `-Copy` copies it. |
+| `aic -Changelog -Since v1.2.0` | changelog grouped by commit type, breaking changes first. Defaults to "since the last tag". |
+| `aic -Bump` | suggests the next semantic version from your commits and offers to create the annotated tag (`-Push` pushes it). |
+| `aic -Stats -Days 60` | sparkline of your rhythm, current streak, busiest day, top types and scopes. |
+| `aic -NewBranch` | the model names a branch (`type/short-description`), you confirm, then the normal commit flow continues. |
+| `aic -CoAuthor 'Name <mail>'` | adds a `Co-authored-by:` footer. |
+
+**Built-in checks** run on the added lines of the staged diff and show up under the diffstat: `console.log`, `debugger`,
+`.only(`, `TODO`/`FIXME`, merge-conflict markers and files over 1 MB. Conflict markers block `-Yes` and ask before a normal
+commit. Disable everything with `-NoLint` or `"lint": false`.
+
+**Auto refs**: a ticket key (`ABC-123`) or issue number in the branch name (`feat/ABC-123-login`, `42-fix-header`, `issue-42`)
+becomes a `Refs:` footer. Disable with `-NoAutoRef` or `"autoRef": false`.
 
 ---
 
@@ -175,7 +201,10 @@ aic -Init
   "scopes": ["auth", "ui", "api", "ai"],
   "exclude": ["*.svg"],
   "aiFiles": ["prompts/*", "*.prompt.md"],
-  "autoStageAi": false
+  "autoStageAi": false,
+  "lint": true,
+  "autoRef": true,
+  "coAuthor": ""
 }
 ```
 
@@ -264,6 +293,23 @@ If `scopes` is set, the model is restricted to them and anything else shows up a
 | `-DryRun` | show the message, commit nothing |
 | `-Copy` | copy the message, commit nothing |
 | `-PassThru` | also return the message as a string |
+
+</details>
+
+<details>
+<summary><b>Review, release & insight tools</b></summary>
+
+| Parameter | Description |
+|---|---|
+| `-Review` | advisory AI review of the staged diff, then exit |
+| `-Pr` / `-Into` | PR title + description; `-Into` sets the target branch (default: origin's default branch) |
+| `-Changelog` / `-Since` | changelog grouped by type, since a ref (default: latest tag) |
+| `-Bump` | suggest the next semver and offer to tag it |
+| `-Stats` / `-Days` | commit statistics for the last `1`–`365` days (default `30`) |
+| `-NewBranch` | model-suggested branch name, created after confirmation |
+| `-CoAuthor` | `Co-authored-by:` footer |
+| `-NoLint` | skip the built-in leftover / conflict-marker / large-file checks |
+| `-NoAutoRef` | do not derive `Refs:` from the branch name |
 
 </details>
 
