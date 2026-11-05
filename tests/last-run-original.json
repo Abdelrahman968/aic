@@ -1,0 +1,1234 @@
+[
+  {
+    "File": "B01-PartialStaging.Tests.ps1",
+    "Name": "B1: partial staging must survive file selection and AI-file staging.Select-Files: pressing Enter on the untouched checklist keeps a partially staged file (MM) exactly as staged",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because only the STAGED line was staged; the UNSTAGED line must not have been added, but they were different.\nExpected length: 18\nActual length:   21\nStrings differ at index 13.\nExpected: 'line1\\nSTAGED\\nline3'\nBut was:  'line1\\nSTAGED\\nUNSTAGED'\n           ---------------^"
+  },
+  {
+    "File": "B01-PartialStaging.Tests.ps1",
+    "Name": "B1: partial staging must survive file selection and AI-file staging.Stage-AiFiles: a partially staged AI file keeps its staged content (the unstaged hunk is not silently added)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because -AiFiles / autoStageAi must not overwrite a hand-built partial staging, but they were different.\nExpected length: 18\nActual length:   21\nStrings differ at index 13.\nExpected: 'line1\\nSTAGED\\nline3'\nBut was:  'line1\\nSTAGED\\nUNSTAGED'\n           ---------------^"
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Limit-ToAi (-AiOnly): a rename from a non-AI path into an AI path must not leave the old-path deletion staged",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'A\tprompts/guide.txt', because an AI-only commit may contain AI paths only: the deletion of notes/guide.txt is not an AI change, but got @('D\tnotes/guide.txt', 'A\tprompts/guide.txt')."
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Load-Changes: a renamed file is reported under its real new path, not as \"dir/{old => new}\"",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nExpected length: 16\nActual length:   33\nStrings differ at index 5.\nExpected: 'docs/new-name.md'\nBut was:  'docs/{old-name.md => new-name.md}'\n           -----^"
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Load-Changes: renaming AGENTS.md to CLAUDE.md is recognised as an all-AI change",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $true, because both sides of the rename are AI instruction files, but got $false."
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Select-Files: unticking a renamed file unstages the whole rename (new path AND old-path deletion)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 0, because with everything unticked the index must equal HEAD again (no half-rename left behind), but got 1."
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-All -DryRun does not change the index or the working tree",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because a preview must not stage or unstage anything, but they were different.\nExpected length: 153\nActual length:   280\nStrings differ at index 17.\nExpected: 'ENTRIES\\nH 100644 fc72a5c1094e203eefcd1c710f060957ebbbaac4 0\\tREADME.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\nBut was:  'ENTRIES\\nH 100644 d8ed843bf42a17903c97f3c29c6376d81ef848cc 0\\tREADME.md\\nH 100644 8ba3a16384aacc37d01564b28401755ce8053f51 0\\tnotes.txt\\nH 100644 2c252ced6d83c4f8d4f789f05635ddcfb2567644 0\\tprompts/p.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\n           ------------------^"
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-AiFiles -DryRun does not change the index or the working tree",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because a preview must not stage or unstage anything, but they were different.\nExpected length: 153\nActual length:   218\nStrings differ at index 79.\nExpected: 'ENTRIES\\nH 100644 fc72a5c1094e203eefcd1c710f060957ebbbaac4 0\\tREADME.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\nBut was:  'ENTRIES\\nH 100644 fc72a5c1094e203eefcd1c710f060957ebbbaac4 0\\tREADME.md\\nH 100644 2c252ced6d83c4f8d4f789f05635ddcfb2567644 0\\tprompts/p.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\n           ----------------------------------------------------------------------------------^"
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-AiOnly -DryRun does not change the index or the working tree",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because a preview must not stage or unstage anything, but they were different.\nExpected length: 153\nActual length:   218\nStrings differ at index 79.\nExpected: 'ENTRIES\\nH 100644 fc72a5c1094e203eefcd1c710f060957ebbbaac4 0\\tREADME.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\nBut was:  'ENTRIES\\nH 100644 fc72a5c1094e203eefcd1c710f060957ebbbaac4 0\\tREADME.md\\nH 100644 2c252ced6d83c4f8d4f789f05635ddcfb2567644 0\\tprompts/p.md\\nH 100644 cb104a424dc56b8d03a8baaf554e85a6b96d4a61 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\n           ----------------------------------------------------------------------------------^"
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-All followed by a generation failure leaves the index as found",
+    "Result": "Failed",
+    "Tags": "Spec",
+    "Error": "Expected strings to be the same, but they were different.\nExpected length: 153\nActual length:   280\nStrings differ at index 17.\nExpected: 'ENTRIES\\nH 100644 fc72a5c1094e203eefcd1c710f060957ebbbaac4 0\\tREADME.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\nBut was:  'ENTRIES\\nH 100644 d8ed843bf42a17903c97f3c29c6376d81ef848cc 0\\tREADME.md\\nH 100644 8ba3a16384aacc37d01564b28401755ce8053f51 0\\tnotes.txt\\nH 100644 2c252ced6d83c4f8d4f789f05635ddcfb2567644 0\\tprompts/p.md\\nH 100644 a26f7eefc5d6ff549bf548a5790ec35761ffdf09 0\\tsrc/app.js\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\n           ------------------^"
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-All -DryRun in an unborn repository leaves the index as found",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nExpected length: 86\nActual length:   144\nStrings differ at index 66.\nExpected: 'ENTRIES\\nH 100644 5626abf0f72e58d7a153368ba57db4c673c0e171 0\\ta.txt\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\nBut was:  'ENTRIES\\nH 100644 5626abf0f72e58d7a153368ba57db4c673c0e171 0\\ta.txt\\nH 100644 f719efd430d52bcfc8566a43b2eb655688d38871 0\\tb.txt\\nFLAGS\\n\\nRESOLVE-UNDO\\n'\n           ---------------------------------------------------------------------^"
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish + restore puts the ORIGINAL index back exactly (partial staging, intent-to-add, skip-worktree)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Start-IndexSession' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).restore REFUSES when the user staged something after aic published, and leaves the user's index alone",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Start-IndexSession' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish REFUSES (and modifies nothing) when the user changed the index while aic was running",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Start-IndexSession' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish REFUSES while another git process holds index.lock, and does not delete that lock",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Start-IndexSession' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish REFUSES when HEAD moved while aic was running",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Start-IndexSession' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).leaves no private index file behind (after a dry run, and after a refused -Yes)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).a failing pre-commit hook: nothing is committed, no crash, no leftover private index",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.Stage-AiFiles does not `git add` a conflicted AI file",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because prompts/p.md still contains conflict markers and must stay unmerged, but they were different.\nExpected length: 365\nActual length:   176\nStrings differ at index 176.\nExpected: '100644 1cf3193cfbbc3739f9f7d3f38706900bdbd9b199 1\\tconf.txt\\n100644 db133015c8114a4e922d89ade395a7fa4f2cfff3 2\\tconf.txt\\n100644 bd7a938d27158431581ac09f97e74be8cabb820f 3\\tconf.txt\\n100644 df30eea99a8dd3ebe2884e2cd24df80323581197 1\\tprompts/p.md\\n100644 efd7a273244538d2b7e99843f1c37b61f8b4fb6a 2\\tprompts/p.md\\n100644 6c3dbd98ad7e709763c23b30f5b5d5ca3dbfaa90 3\\tprompts/p.md'\nBut was:  '100644 1cf3193cfbbc3739f9f7d3f38706900bdbd9b199 1\\tconf.txt\\n100644 db133015c8114a4e922d89ade395a7fa4f2cfff3 2\\tconf.txt\\n100644 bd7a938d27158431581ac09f97e74be8cabb820f 3\\tconf.txt'\n           -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------^"
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.Select-Files: accepting the untouched checklist does not resolve conflicted paths",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nExpected length: 365\nActual length:   0\nStrings differ at index 0.\nExpected: '100644 1cf3193cfbbc3739f9f7d3f38706900bdbd9b199 1\\tconf.txt\\n100644 db133015c8114a4e922d89ade395a7fa4f2cfff3 2\\tconf.txt\\n100644 bd7a938d27158431581ac09f97e74be8cabb820f 3\\tconf.txt\\n100644 df30eea99a8dd3ebe2884e2cd24df80323581197 1\\tprompts/p.md\\n100644 efd7a273244538d2b7e99843f1c37b61f8b4fb6a 2\\tprompts/p.md\\n100644 6c3dbd98ad7e709763c23b30f5b5d5ca3dbfaa90 3\\tprompts/p.md'\nBut was:  ''\n           ^"
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.-All -DryRun does not resolve conflicted paths (end to end)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because `git add -A` during a merge silently stages the conflict markers, but they were different.\nExpected length: 365\nActual length:   0\nStrings differ at index 0.\nExpected: '100644 1cf3193cfbbc3739f9f7d3f38706900bdbd9b199 1\\tconf.txt\\n100644 db133015c8114a4e922d89ade395a7fa4f2cfff3 2\\tconf.txt\\n100644 bd7a938d27158431581ac09f97e74be8cabb820f 3\\tconf.txt\\n100644 df30eea99a8dd3ebe2884e2cd24df80323581197 1\\tprompts/p.md\\n100644 efd7a273244538d2b7e99843f1c37b61f8b4fb6a 2\\tprompts/p.md\\n100644 6c3dbd98ad7e709763c23b30f5b5d5ca3dbfaa90 3\\tprompts/p.md'\nBut was:  ''\n           ^"
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.CONTROL: a plain -DryRun during a merge does not change the unmerged state",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes when a secret sits in a file hidden by -Exclude",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because secrets/aws.txt must still be scanned. Committed tree: .keep, secrets/aws.txt, src/a.js, but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: '5d61ea1584db749812ceeab16e1fbdda0e124a9b'\nBut was:  '80ef3ad21b5b9434c593a538c2bdea06996891f0'\n           ^"
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes when a secret sits in a file hidden by \"exclude\" in .aic.json",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: '076abedc89b06b20671c722f99b6880b7b494e40'\nBut was:  '2dc33311fde85559448f868cdad7ec1cad2478fe'\n           ^"
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes for an excluded key file (private key header and .pem name)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: '9bc2a6cd1268cd47e9995f1f812d53d6a9c28a74'\nBut was:  'b11bda5430d6fa70fafb838bb7160870493c7cc9'\n           ^"
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes when a token is inside a lockfile (lockfiles are hidden from the model by default)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: '97b7aa4145563ffdee44810cabc16ec31c166118'\nBut was:  'eee498bc177e9a23ddcb0826f3769633593191e2'\n           ^"
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.CONTROL: the same secret in a NOT excluded file is already refused",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.forged trailers.drops model-supplied Signed-off-by / Co-authored-by / Closes / Fixes lines",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'Signed-off-by' to not match 'feat(x): add y\n\n- did a thing\n\nSigned-off-by: Evil <e@evil.test>\nCo-authored-by: Bot <b@evil.test>\nCloses #1\nFixes #2', but it did match."
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.forged trailers.CONTROL: BREAKING CHANGE and Refs footers from the model are kept",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.forged trailers.CONTROL: the user-supplied -CoAuthor still produces exactly one Co-authored-by footer",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.terminal escape sequences and control characters.Normalize-Message strips ESC / BEL / C1 control characters from subject and bullets",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 0, because control characters would be rendered by the terminal and written to git history, but got 5."
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.terminal escape sequences and control characters.a model reply containing escape sequences never reaches the commit (end to end, -Yes)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $false, because HEAD message was: feat: add ?]0;pwned? thing, but got $true."
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.terminal escape sequences and control characters.-ListAi does not print raw escape sequences found in file names",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $false, because a file name must not be able to drive the terminal, but got $true."
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.done_reason \"length\" (output cut at -NumPredict) is not committed with -Yes",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because a message cut off mid-sentence was committed: 'feat(auth): add login validation for', but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: 'b6cdb808672868a25ee59cf04823655f7ca7add6'\nBut was:  'ed1fe91e94bdffd32c0933bf1a72a3bdec1d38a0'\n           ^"
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.a stream that ends without a final done:true is not committed with -Yes",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: '6cf2ef22fb443dd804f450f1f35984776abf9cf5'\nBut was:  '394ca12ac75a1da3962f101c29d65a9ec0e8f011'\n           ^"
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.a malformed NDJSON line in the middle of the stream is not silently dropped into a committed message",
+    "Result": "Failed",
+    "Tags": "Spec",
+    "Error": "Expected strings to be the same, but they were different.\nString lengths are both 40.\nStrings differ at index 0.\nExpected: '3f09630be826a0c0fd1b5b201d9a3527a47bbfae'\nBut was:  '54e609a80dc36f46f3c510621f92cd9cc93965cf'\n           ^"
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.CONTROL: a complete stream (done:true, done_reason stop) is committed with -Yes",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B13-SetextFalsePositive.Tests.ps1",
+    "Name": "B13: conflict-marker detection.a setext heading underline (=======) in Markdown is not a conflict marker",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $false, because documentation headings must not block -Yes, but got $true."
+  },
+  {
+    "File": "B13-SetextFalsePositive.Tests.ps1",
+    "Name": "B13: conflict-marker detection.CONTROL: a real conflict block with all three marker lines is still detected",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.a value of the wrong type is reported and ignored, aic keeps running",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, because a bad config value must not surface as a raw exception, but got 'aic: /home/claude/aic/tests/Helpers/Invoke-AicChild.ps1:9\nLine |\n   9 |      $res.Pipeline = @(& aic @p | ForEach-Object { \"$_\" })\n     |                        ~~~~~~~~\n     | Cannot convert value \"many\" to type \"System.Int32\". Error: \"The input string 'many' was not in a correct format.\"\n\n'."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.a misspelled key is reported with a suggestion",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'unknown.*theem.*theme' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:40439 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did not match."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.an invalid value for an enum key is reported",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'theme.*nope' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:40439 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did not match."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.an out-of-range number is reported (and still clamped, as before)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'bullets.*99' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:40439 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did not match."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.-ConfigValidate on a good config says so, exits 0 and never contacts Ollama",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic: /home/claude/aic/tests/Helpers/Invoke-AicChild.ps1:9\nLine |\n   9 |      $res.Pipeline = @(& aic @p | ForEach-Object { \"$_\" })\n     |                              ~~\n     | A parameter cannot be found that matches parameter name 'ConfigValidate'.\n\n'."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.-ConfigValidate on a bad config lists every problem and exits 1",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic: /home/claude/aic/tests/Helpers/Invoke-AicChild.ps1:9\nLine |\n   9 |      $res.Pipeline = @(& aic @p | ForEach-Object { \"$_\" })\n     |                              ~~\n     | A parameter cannot be found that matches parameter name 'ConfigValidate'.\n\n'."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.scope enforcement is case-sensitive (\"Auth\" is not \"auth\")",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected the actual value to be greater than 0, but got 0."
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.CONTROL: unreadable JSON is a warning, aic still runs",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.-DryRun: exit 0 and nothing on the pipeline",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.-Yes commit: exit 0 and git's commit summary does not leak into the pipeline",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, because leaked: [main 8a24bd4] feat: add thing |  1 file changed, 1 insertion(+), 1 deletion(-), but got @('[main 8a24bd4] feat: add thing', ' 1 file changed, 1 insertion(+), 1 deletion(-)')."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.-Yes -PassThru: the pipeline is exactly the commit message",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.blocked by the secret scan: exit 3",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 3, but got 0."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.incomplete model stream under -Yes: exit 3",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 3, but got 0."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.Ollama not reachable: exit 4",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 4, but got 0."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.model not installed: exit 4",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 4, but got 0."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.generation failure (HTTP 500): exit 1",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 1, but got 0."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.not inside a git repository: exit 1",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 1, but got 128."
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.nothing staged: exit 5",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 5, but got 0."
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.-Push with a single remote that is not called origin pushes to it and sets the upstream",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, because * aic  AI commit - local & private\n  * ollama - 127.0.0.1:40277 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  OK committed e794f83 on main  1 file changed, 1 insertion(+), 1 deletion(-)\n  Committed. No \"fix stuff\" was harmed.  - 1.0s\n  pushing - main ...\n\n  x git push failed\n    See the git output above., but they were different.\nExpected length: 40\nActual length:   0\nStrings differ at index 0.\nExpected: 'e794f83b03ee4d2cff6dfa7edaa0434246357551'\nBut was:  ''\n           ^"
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.-Push with several remotes and no upstream does not guess: it names the remotes and pushes nowhere",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'up1' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:40277 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  OK committed c338c0e on main  1 file changed, 1 insertion(+), 1 deletion(-)\n  Committed. No \"fix stuff\" was harmed.  - 0.8s\n  pushing - main ...\n\n  x git push failed\n    See the git output above.\n', but it did not match."
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.-Amend on a commit that is already on the remote warns that history is being rewritten",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'already on the remote' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:40277 - qwen2.5-coder:7b\n\n  +- Amending last commit ----------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  OK amended c3bf279 on main  1 file changed, 1 insertion(+), 1 deletion(-)\n  Another tiny victory for the changelog.  - 0.9s\n', but it did not match."
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.CONTROL: -Amend on a local-only commit does not warn",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.CONTROL: -Push to origin with an upstream already set keeps working",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.bases the bump on the HIGHEST semver tag reachable from HEAD, not the nearest one",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'v1.1.0' to be found in collection @('v0.10.0', 'v0.9.0', 'v1.0.0'), because * aic  AI commit - local & private\n\n  +- Release bump ----------------------------------------------------- v0.9.0\n  | commits   1\n  | features  1\n  | fixes     0\n  | breaking  0\n  +- minor bump > v0.10.0\n  OK created tag v0.10.0, but it was not found."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.bumping from a prerelease releases that version (v1.2.3-rc.1 + fix -> v1.2.3)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'v1.2.3' to be found in collection @('v1.2.3-rc.1', 'v1.2.4'), because * aic  AI commit - local & private\n\n  +- Release bump ------------------------------------------------ v1.2.3-rc.1\n  | commits   1\n  | features  0\n  | fixes     1\n  | breaking  0\n  +- patch bump > v1.2.4\n  OK created tag v1.2.4, but it was not found."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.ignores tags that are not semantic versions",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'v1.1.0' to be found in collection @('nightly', 'v1.0.0'), because * aic  AI commit - local & private\n\n  x The last tag 'nightly' is not a semantic version (x.y.z)., but it was not found."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.prose that merely mentions BREAKING CHANGE is not a breaking change",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'v1.1.0' to be found in collection @('v1.0.0', 'v2.0.0'), because * aic  AI commit - local & private\n\n  +- Release bump ----------------------------------------------------- v1.0.0\n  | commits   1\n  | features  1\n  | fixes     0\n  | breaking  1\n  +- major bump > v2.0.0\n  OK created tag v2.0.0, but it was not found."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.refuses to bump in a shallow clone (history is incomplete)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'shallow' to match '\n  * aic  AI commit - local & private\n\n  +- Release bump ------------------------------------------------- no tag yet\n  | commits   1\n  | features  0\n  | fixes     1\n  | breaking  0\n  +- patch bump > v0.0.1\n  OK created tag v0.0.1\n', but it did not match."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.refuses -Push when the tag already exists on the remote, and creates no local tag",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'v1.1.0' to not be found in collection @('v1.0.0', 'v1.1.0'), because * aic  AI commit - local & private\n\n  +- Release bump ----------------------------------------------------- v1.0.0\n  | commits   1\n  | features  1\n  | fixes     0\n  | breaking  0\n  +- minor bump > v1.1.0\n  OK created tag v1.1.0\n?[31;1mTo /tmp/aic-t-eea228cd48/origin.git?[0m\n?[31;1m ! [rejected]        v1.1.0 -> v1.1.0 (already exists)?[0m\n?[31;1merror: failed to push some refs to '/tmp/aic-t-eea228cd48/origin.git'?[0m\n?[31;1mhint: Updates were rejected the tag already exists in the remote.?[0m\n\n  x git push failed\n    See the git output above., but it was found."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.-Changelog lists a BREAKING CHANGE footer under \"Breaking changes\"",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression '(?s)### Breaking changes\\s*\\n- shiny' to match '## Changes since v1.0.0\n\n### Features\n- shiny (be85e6b)', but it did not match."
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.CONTROL: a BREAKING CHANGE footer makes a major bump",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.CONTROL: \"feat!:\" makes a major bump; build metadata (v1.2.3+b5) bumps the patch",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.CONTROL: -Bump -Yes -Push pushes the new tag",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.a secret value inside a diff is replaced by a marker before the prompt is built (and still reported)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'AKIAIOSFODNN7EXAMPLE' to not match '{\"model\":\"qwen2.5-coder:7b\",\"stream\":true,\"keep_alive\":\"10m\",\"messages\":[{\"content\":\"You are an expert developer who writes git commit messages.\\nUse Conventional Commits: type(scope): subject\\ntype is one of: feat, fix, refactor, perf, docs, style, test, build, ci, chore.\\nSubject: imperative mood, lowercase, no trailing period, max 72 characters.\\nFor non-trivial changes add a blank line, then up to 3 bullets (\\\"- \\\") explaining what changed and why.\\nDescribe only what is visible in the diff. Never invent details.\\nOutput ONLY the commit message: no markdown fences, no quotes, no preamble.\\n\\nExample:\\nfix(api): return 404 when the user does not exist\\n\\n- throw NotFoundError instead of returning null\\n- add a test for the missing-user case\",\"role\":\"system\"},{\"content\":\"Branch: main\\n\\nRecent commits (style reference only, never copy them):\\n- chore: initial\\n\\nFiles changed:\\nconfig.txt (+1 -0)\\nsrc/a.js (+1 -1)\\n\\nDiff:\\ndiff --git a/config.txt b/config.txt\\nnew file mode 100644\\nindex 0000000..9ec5353\\n--- /dev/null\\n+++ b/config.txt\\n@@ -0,0 +1 @@\\n+aws_access_key_id = AKIAIOSFODNN7EXAMPLE\\ndiff --git a/src/a.js b/src/a.js\\nindex cb104a4..a26f7ee 100644\\n--- a/src/a.js\\n+++ b/src/a.js\\n@@ -1 +1 @@\\n-let a = 1;\\n+let a = 2;\",\"role\":\"user\"}],\"options\":{\"temperature\":0.2,\"num_ctx\":4096,\"num_predict\":256}}', but it did match."
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.two secrets on one line are both redacted",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'AKIAIOSFODNN7EXAMPL' to not match '{\"model\":\"qwen2.5-coder:7b\",\"stream\":true,\"keep_alive\":\"10m\",\"messages\":[{\"content\":\"You are an expert developer who writes git commit messages.\\nUse Conventional Commits: type(scope): subject\\ntype is one of: feat, fix, refactor, perf, docs, style, test, build, ci, chore.\\nSubject: imperative mood, lowercase, no trailing period, max 72 characters.\\nFor non-trivial changes add a blank line, then up to 3 bullets (\\\"- \\\") explaining what changed and why.\\nDescribe only what is visible in the diff. Never invent details.\\nOutput ONLY the commit message: no markdown fences, no quotes, no preamble.\\n\\nExample:\\nfix(api): return 404 when the user does not exist\\n\\n- throw NotFoundError instead of returning null\\n- add a test for the missing-user case\",\"role\":\"system\"},{\"content\":\"Branch: main\\n\\nRecent commits (style reference only, never copy them):\\n- chore: initial\\n\\nFiles changed:\\nconfig.txt (+1 -0)\\nsrc/a.js (+1 -1)\\n\\nDiff:\\ndiff --git a/config.txt b/config.txt\\nnew file mode 100644\\nindex 0000000..01205b6\\n--- /dev/null\\n+++ b/config.txt\\n@@ -0,0 +1 @@\\n+pair = AKIAIOSFODNN7EXAMPLE / AKIAIOSFODNN7EXAMPL2\\ndiff --git a/src/a.js b/src/a.js\\nindex cb104a4..a26f7ee 100644\\n--- a/src/a.js\\n+++ b/src/a.js\\n@@ -1 +1 @@\\n-let a = 1;\\n+let a = 2;\",\"role\":\"user\"}],\"options\":{\"num_ctx\":4096,\"temperature\":0.2,\"num_predict\":256}}', but it did match."
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.the content of a credential file (.env) is omitted, only its name is sent",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'hunter2' to not match '{\"model\":\"qwen2.5-coder:7b\",\"stream\":true,\"keep_alive\":\"10m\",\"messages\":[{\"content\":\"You are an expert developer who writes git commit messages.\\nUse Conventional Commits: type(scope): subject\\ntype is one of: feat, fix, refactor, perf, docs, style, test, build, ci, chore.\\nSubject: imperative mood, lowercase, no trailing period, max 72 characters.\\nFor non-trivial changes add a blank line, then up to 3 bullets (\\\"- \\\") explaining what changed and why.\\nDescribe only what is visible in the diff. Never invent details.\\nOutput ONLY the commit message: no markdown fences, no quotes, no preamble.\\n\\nExample:\\nfix(api): return 404 when the user does not exist\\n\\n- throw NotFoundError instead of returning null\\n- add a test for the missing-user case\",\"role\":\"system\"},{\"content\":\"Branch: main\\n\\nRecent commits (style reference only, never copy them):\\n- chore: initial\\n\\nFiles changed:\\n.env (+1 -0)\\nsrc/a.js (+1 -1)\\n\\nDiff:\\ndiff --git a/.env b/.env\\nnew file mode 100644\\nindex 0000000..ba90d6a\\n--- /dev/null\\n+++ b/.env\\n@@ -0,0 +1 @@\\n+DB_PASSWORD=hunter2hunter2hunter2\\ndiff --git a/src/a.js b/src/a.js\\nindex cb104a4..a26f7ee 100644\\n--- a/src/a.js\\n+++ b/src/a.js\\n@@ -1 +1 @@\\n-let a = 1;\\n+let a = 2;\",\"role\":\"user\"}],\"options\":{\"num_ctx\":4096,\"num_predict\":256,\"temperature\":0.2}}', but it did match."
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.-Review redacts as well",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'AKIAIOSFODNN7EXAMPLE' to not match '{\"model\":\"qwen2.5-coder:7b\",\"stream\":true,\"keep_alive\":\"10m\",\"messages\":[{\"role\":\"system\",\"content\":\"You are a careful senior code reviewer.\\nReview ONLY the staged diff you are given. Output at most 5 short bullets (\\\"- \\\") about real problems: bugs, missing error handling, security risks, leftover debug code, unclear naming.\\nStart every bullet with the file name. Do not praise, do not summarise, do not invent code that is not in the diff.\\nIf you find no problems output exactly one bullet: - no problems found\"},{\"role\":\"user\",\"content\":\"Files changed:\\nconfig.txt (+1 -0)\\nsrc/a.js (+1 -1)\\n\\nDiff:\\ndiff --git a/config.txt b/config.txt\\nnew file mode 100644\\nindex 0000000..9ec5353\\n--- /dev/null\\n+++ b/config.txt\\n@@ -0,0 +1 @@\\n+aws_access_key_id = AKIAIOSFODNN7EXAMPLE\\ndiff --git a/src/a.js b/src/a.js\\nindex cb104a4..a26f7ee 100644\\n--- a/src/a.js\\n+++ b/src/a.js\\n@@ -1 +1 @@\\n-let a = 1;\\n+let a = 2;\"}],\"options\":{\"num_ctx\":4096,\"temperature\":0.2,\"num_predict\":400}}', but it did match."
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.-Pr redacts the branch diff",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'AKIAIOSFODNN7EXAMPLE' to not match '{\"model\":\"qwen2.5-coder:7b\",\"stream\":true,\"keep_alive\":\"10m\",\"messages\":[{\"role\":\"system\",\"content\":\"You write pull request descriptions for code review.\\nLine 1 is the PR title in Conventional Commits style: type(scope): subject, lowercase, no trailing period, max 72 characters.\\nThen a blank line, then Markdown with exactly these sections: \\\"## Summary\\\" (2 to 3 sentences), \\\"## Changes\\\" (short bullets, grouped by area), \\\"## Testing\\\" (bullets, ONLY what can be inferred from the diff; omit the section if nothing can be inferred).\\nDescribe only what is visible in the commits and the diff. Never invent details.\\nOutput only the PR text: no fences, no preamble.\"},{\"role\":\"user\",\"content\":\"Branch: feat/x -> main\\nCommits:\\n- feat: add config\\n\\nFiles changed:\\nconfig.txt (+1 -0)\\n\\nDiff:\\ndiff --git a/config.txt b/config.txt\\nnew file mode 100644\\nindex 0000000..9ec5353\\n--- /dev/null\\n+++ b/config.txt\\n@@ -0,0 +1 @@\\n+aws_access_key_id = AKIAIOSFODNN7EXAMPLE\"}],\"options\":{\"temperature\":0.3,\"num_ctx\":4096,\"num_predict\":700}}', but it did match."
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.CONTROL: a lockfile token is not in the prompt (lockfiles are hidden from the model)",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.warns when the endpoint is not on this machine (plain http AND https)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Get-EndpointWarning' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.does not claim \"zero tokens left the building\" for a remote endpoint",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Get-QuipPool' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a year-like branch prefix (2024-refactor) is not an issue number",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'from the branch name' to not match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:33691 - qwen2.5-coder:7b\n  * ref #2024 (from the branch name)\n\n  +- Staged changes -------------------------------------------- 2024-refactor\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | \n  | Refs: #2024\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did match."
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a date-like branch prefix (12-05-cleanup) is not an issue number",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'from the branch name' to not match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:33691 - qwen2.5-coder:7b\n  * ref #12 (from the branch name)\n\n  +- Staged changes -------------------------------------------- 12-05-cleanup\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | \n  | Refs: #12\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did match."
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a CVE id (fix/CVE-2024-1234) is not cut into a bogus ticket key",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'ref CVE-2024 ' to not match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:33691 - qwen2.5-coder:7b\n  * ref CVE-2024 (from the branch name)\n\n  +- Staged changes ---------------------------------------- fix/CVE-2024-1234\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | \n  | Refs: CVE-2024\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did match."
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.CONTROL: feat/ABC-123-login still gives Refs ABC-123",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.CONTROL: 42-fix-header still gives #42",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.CONTROL: issue-42 still gives #42",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a commit that only changes a lockfile can still be written",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'dry run' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:33691 - qwen2.5-coder:7b\n  ! Nothing staged (or only lockfiles). Run \"git add ...\", use aic -All / -AiFiles, or run aic in a normal terminal for the file checklist.\n', because * aic  AI commit - local & private\n  * ollama - 127.0.0.1:33691 - qwen2.5-coder:7b\n  ! Nothing staged (or only lockfiles). Run \"git add ...\", use aic -All / -AiFiles, or run aic in a normal terminal for the file checklist., but it did not match."
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.an empty index is still \"nothing to commit\" (exit 5), the lockfile fallback does not invent a commit",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 5, but got 0."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr never repeats testing claims made by the model",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'all tests pass' to not match 'feat(x): add the thing\n\n## Summary\nAdds the thing.\n\n## Changes\n- adds b.txt\n\n## Testing\n- all tests pass on CI\n- manually verified', but it did match."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr states which test files changed (evidence) and that aic did not run them",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression '(?s)## Testing.*src/b\\.test\\.js' to match 'feat(x): add the thing\n\n## Summary\nAdds the thing.\n\n## Changes\n- adds b.txt\n\n## Testing\n- all tests pass on CI\n- manually verified', but it did not match."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr says plainly when no test file changed",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'No test files changed' to match 'feat(x): add the thing\n\n## Summary\nAdds the thing.\n\n## Changes\n- adds b.txt\n\n## Testing\n- all tests pass on CI\n- manually verified', but it did not match."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr warns when the model stream was cut off",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'cut off' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:36887 - qwen2.5-coder:7b\n  Generating with qwen2.5-coder:7b ...\n\n  +- Pull request ---------------------------------------------- feat/x > main\n  | feat(x): add the thing\n  | \n  | Summary\n  | Adds\n  +- 1 commit - 0.1s - qwen2.5-coder:7b\n', but it did not match."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Review.discloses that only part of a large diff was reviewed, and never claims a clean bill of health for all of it",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'only part of the diff' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:36887 - qwen2.5-coder:7b\n\n  +- Staged changes --------------------------------------------------- feat/x\n  | + 400 -   0  ############     big.txt\n  +- 1 file - +400 -0\n  Generating with qwen2.5-coder:7b ...\n\n  +- AI review ---------------------------------------------------- [advisory]\n  | - no problems found\n  +- local model - advisory only, verify before you rely on it - 0.1s\n', but it did not match."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Review.warns when the review stream ended before the model finished",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'ended before' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:36887 - qwen2.5-coder:7b\n\n  +- Staged changes --------------------------------------------------- feat/x\n  | + 400 -   0  ############     big.txt\n  +- 1 file - +400 -0\n  Generating with qwen2.5-coder:7b ...\n\n  +- AI review ---------------------------------------------------- [advisory]\n  | - big.txt: something\n  +- local model - advisory only, verify before you rely on it - 0.4s\n', but it did not match."
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Review.CONTROL: a small diff is reviewed without any coverage warning",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.proxy.a proxy in the environment does not break calls to a local Ollama (tags, show and chat all bypass it)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'dry run' to match '\n  * aic  AI commit - local & private\n\n  x Can't reach Ollama at http://127.0.0.1:33601\n    Start it (open the Ollama app or run: ollama serve), use -StartOllama, or pass -OllamaUrl.\n', because * aic  AI commit - local & private\n\n  x Can't reach Ollama at http://127.0.0.1:33601\n    Start it (open the Ollama app or run: ollama serve), use -StartOllama, or pass -OllamaUrl., but it did not match."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.HTTP 503 followed by success: one retry, the commit is made exactly once",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 2, but got 1."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.a connection that dies before the first byte is retried",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 2, but got 1."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.gives up after 2 retries (3 requests in total) and reports the failure",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 3, but got 1."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.CONTROL: \"model not found\" (404) is not retried and tells you what to pull",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.CONTROL: a client error (400) is not retried",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.timeout and cancellation.a stalled stream times out, is not retried, commits nothing and leaves no connection open",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 1, but got 0."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.reporting.reports first-token latency next to the speed",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'first token \\d' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:33601 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   1 -   1  ############     a.txt\n  +- 1 file - +1 -1\n  Generating with qwen2.5-coder:7b ...\n\n  +- Commit message ------------------------------------------ [feat] OK valid\n  | feat: add thing\n  | subject ##.......... 15/72 - 0 bullets\n  +- 3 tok - 0.1s - 3.0 tok/s - qwen2.5-coder:7b\n\n  dry run - nothing was committed\n', but it did not match."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.context window.never asks for more context than the model has, and shortens the diff to fit",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected the actual value to be less than or equal to 2048, but got 5120."
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.context window.CONTROL: without a known context length nothing is clamped or shortened",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.thinking models and empty answers (existing behaviour).CONTROL: a thinking-capable model is called with think:false",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.thinking models and empty answers (existing behaviour).CONTROL: a model that only thinks is reported, not committed",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.thinking models and empty answers (existing behaviour).CONTROL: an empty answer is reported, not committed",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.an OpenAI-compatible server works: models from /v1/models, answer streamed over /v1/chat/completions, no Ollama endpoints touched",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'feat: add thing' to match <empty>, but it did not match."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.an answer cut off by the server (finish_reason length) is not auto-committed",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 3, but got $null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.a stream that never reaches [DONE] is not auto-committed",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 3, but got $null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.a model the server does not offer is reported (exit 4)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 4, but got $null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.an error object from the server is shown as text",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'context is too long' to match <empty>, but it did not match."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.AIC_API_KEY is sent as a Bearer token and never printed",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'Bearer test-key-123', but got $null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.no key configured: no Authorization header is sent",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected the actual value to be greater than 0, because precondition: the request was made, but got 0."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.\"provider\" in .aic.json selects the provider; an unknown provider is reported by -ConfigValidate",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected '/v1/chat/completions' to be found in collection /api/tags, but it was not found."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.CONTROL: Ollama is still the default provider",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.fast = small, balanced = about 7B, quality = the largest model that is still practical (not the 70B)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $null or empty, but got 'aic_harness: /home/claude/aic/tests/Helpers/Invoke-HarnessChild.ps1:10\nLine |\n  10 |      $out = @(aic_harness @p)\n     |               ~~~~~~~~~~~~~~\n     | The term 'Get-ModelRecommendation' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\n\n'."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.a single installed model is every profile; embedding models are never recommended",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'only:latest', but got $null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.balanced picks the model closest to 7B, prefers a coder model on a tie, and estimates parameters from the size when the name has none",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 'mistral:7b', but got $null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-Profile fast / balanced / quality choose the model",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Cannot bind argument to parameter 'InputObject' because it is null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-Profile fast / balanced / quality choose the model",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Cannot bind argument to parameter 'InputObject' because it is null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-Profile fast / balanced / quality choose the model",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Cannot bind argument to parameter 'InputObject' because it is null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.an explicit -Model beats -Profile",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Cannot bind argument to parameter 'InputObject' because it is null."
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.\"profile\" in .aic.json is used when no model is configured, and \"model\" wins when both are",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected strings to be the same, but they were different.\nString lengths are both 16.\nStrings differ at index 14.\nExpected: 'qwen2.5-coder:3b'\nBut was:  'qwen2.5-coder:7b'\n           --------------^"
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-ListModels shows size, estimated parameters and which profile each model is recommended for, without generating anything",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 0, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.a finding whose evidence is in the diff is verified, and its line number is derived from the diff",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $true, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.a wrong line number from the model is replaced by the real one",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Cannot index into a null array."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.quoted code that is not in the diff makes the finding unverified and removes its line number",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Cannot index into a null array."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.a finding about a file that is not in the diff is dropped and counted",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 1, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.severities are normalised (Critical, LOW, anything else = info) and sorted most severe first",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected @('critical', 'low', 'info'), but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewSeverity high keeps only high and critical and says how many were filtered",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 2, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.an empty list means \"no problems found\", still marked advisory",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 0, but got 1."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.free-text bullets from a model that ignores the format are passed on as unverified notes, never as findings",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 0, but got 1."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewJson keeps stdout clean (the interface goes to stderr) and the pipeline holds exactly one JSON document",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 1, but got 0."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.reports how much of the diff was reviewed",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected $true, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewMarkdown produces a document with severity, file:line, the advisory notice and the no-tests statement",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression '(?m)^# AI review' to match <empty>, but it did not match."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.the interactive card shows the severity and whether a finding is verified",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression '\\[HIGH\\]' to match '\n  * aic  AI commit - local & private\n  * ollama - 127.0.0.1:37873 - qwen2.5-coder:7b\n\n  +- Staged changes ----------------------------------------------------- main\n  | +   4 -   0  ############     src/auth.js\n  +- 1 file - +4 -0\n  Generating with qwen2.5-coder:7b ...\n\n  +- AI review ---------------------------------------------------- [advisory]\n  | - [{\"file\":\"src/auth.js\",\"fix\":\"do the right thing\",\"evidence\":\"const q\n  |   = \\\"SELECT * FROM users WHERE name='\\\" + user + \\\"'\\\";\",\"title\":\"SQL\n  |   injection\",\"why\":\"because it\n  |   matters\",\"line\":2,\"severity\":\"high\"},{\"file\":\"src/auth.js\",\"fix\":\"do\n  |   the right thing\",\"evidence\":\"not in the diff at\n  |   all\",\"title\":\"Guess\",\"why\":\"because it\n  |   matters\",\"line\":3,\"severity\":\"low\"}]\n  +- local model - advisory only, verify before you rely on it - 0.1s\n', but it did not match."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.tells the model that the diff is untrusted data and asks for JSON",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'untrusted' to match $null, but it did not match."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewJson together with -ReviewMarkdown is a usage error (exit 2)",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 2, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewDiff  reviews the branch against a ref and never touches the index",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected regular expression 'main' to match $null, but it did not match."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewDiff with an unknown ref is reported",
+    "Result": "Failed",
+    "Tags": "",
+    "Error": "Expected 1, but got $null."
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.CONTROL: the old free-text review still works (bullets, \"no problems found\")",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.harness sanity: -DryRun reaches the preview, talks to the mock only, commits nothing",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-Yes commits the staged change with the generated message",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-Yes -Type fix -Scope api forces the header",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-All -Yes stages everything and commits it",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-DryRun -PassThru returns the message on the pipeline",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-Undo -Yes soft-undoes the last commit and keeps the changes staged",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.a repo-level .aic.json overrides ~/.aic.json, and a typed flag overrides both",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Normalize-Message strips fences, think-blocks and preamble, lower-cases the subject, drops the trailing dot",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Test-Message accepts a valid header and rejects bad / over-long ones",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Test-AiPath recognises AI tooling files and ignores ordinary source",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Find-Secrets flags an AWS key, a private-key file and .env, but not .env.example or placeholders",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Get-Changes reports a partially staged file as Staged AND Dirty, and untracked files as unstaged",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Find-Leftovers reports console.log in JS and a TODO, without blocking",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: AI-file staging.Stage-AiFiles stages an untracked AI file and leaves a non-AI file alone",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: AI-file staging.Limit-ToAi (-AiOnly) unstages a plain non-AI file and keeps it in the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: AI-file staging.Select-Files stages a newly ticked unstaged file",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.a commit keeps the skip-worktree flag of an unrelated file",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.committing a partially staged file commits only the staged hunk and keeps the rest in the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.-Amend -Yes rewrites the message of the last commit without adding a commit",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.-AiOnly -Yes commits only the AI file and leaves the other change in the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.works inside a linked worktree (its own index lives under .git/worktrees)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.the very first commit of an unborn repository works (no HEAD, no index file before staging)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree refuses to run while the index has unmerged entries",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree + read-tree loses intent-to-add (git add -N) entries",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree + read-tree resets skip-worktree and assume-unchanged flags",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree + read-tree discards the resolve-undo extension (git checkout -m / update-index --unresolve)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.a byte copy of the index file restores ALL of those states exactly",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.git status rewrites the index file (stat refresh): raw hashes cannot detect user changes, the semantic fingerprint can",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.a linked worktree has its own index outside the main .git directory (use rev-parse --git-path index)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.restores partial staging, skip-worktree flags and untracked state when the index is still what aic left",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.REFUSES to restore when the user changed the index after aic did",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.REFUSES to restore while another git process holds index.lock, and leaves that lock alone",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.REFUSES to restore when HEAD moved (e.g. a commit happened in between)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  }
+]

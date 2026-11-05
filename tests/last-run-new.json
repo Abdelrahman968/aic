@@ -1,0 +1,1290 @@
+[
+  {
+    "File": "B01-PartialStaging.Tests.ps1",
+    "Name": "B1: partial staging must survive file selection and AI-file staging.Select-Files: pressing Enter on the untouched checklist keeps a partially staged file (MM) exactly as staged",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B01-PartialStaging.Tests.ps1",
+    "Name": "B1: partial staging must survive file selection and AI-file staging.Stage-AiFiles: a partially staged AI file keeps its staged content (the unstaged hunk is not silently added)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Limit-ToAi (-AiOnly): a rename from a non-AI path into an AI path must not leave the old-path deletion staged",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Load-Changes: a renamed file is reported under its real new path, not as \"dir/{old => new}\"",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Load-Changes: renaming AGENTS.md to CLAUDE.md is recognised as an all-AI change",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B02-Renames.Tests.ps1",
+    "Name": "B2: renames are handled as old-path + new-path.Select-Files: unticking a renamed file unstages the whole rename (new path AND old-path deletion)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-All -DryRun does not change the index or the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-AiFiles -DryRun does not change the index or the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-AiOnly -DryRun does not change the index or the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-All followed by a generation failure leaves the index as found",
+    "Result": "Passed",
+    "Tags": "Spec",
+    "Error": []
+  },
+  {
+    "File": "B03-IndexMutationBeforeExit.Tests.ps1",
+    "Name": "B3: runs that end without a commit leave the index as they found it.-All -DryRun in an unborn repository leaves the index as found",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish + restore puts the ORIGINAL index back exactly (partial staging, intent-to-add, skip-worktree)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).restore REFUSES when the user staged something after aic published, and leaves the user's index alone",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish REFUSES (and modifies nothing) when the user changed the index while aic was running",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish REFUSES while another git process holds index.lock, and does not delete that lock",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).publish REFUSES when HEAD moved while aic was running",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).leaves no private index file behind (after a dry run, and after a refused -Yes)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B03b-IndexSession.Tests.ps1",
+    "Name": "B3b: index session (private index copy, guarded publish and restore).a failing pre-commit hook: nothing is committed, no crash, no leftover private index",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.Stage-AiFiles does not `git add` a conflicted AI file",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.Select-Files: accepting the untouched checklist does not resolve conflicted paths",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.-All -DryRun does not resolve conflicted paths (end to end)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B04-UnmergedEntries.Tests.ps1",
+    "Name": "B4: conflicted files are never marked resolved by aic.CONTROL: a plain -DryRun during a merge does not change the unmerged state",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes when a secret sits in a file hidden by -Exclude",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes when a secret sits in a file hidden by \"exclude\" in .aic.json",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes for an excluded key file (private key header and .pem name)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.refuses -Yes when a token is inside a lockfile (lockfiles are hidden from the model by default)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B05-ScanFilteredDiff.Tests.ps1",
+    "Name": "B5: excluded files are still scanned for secrets.CONTROL: the same secret in a NOT excluded file is already refused",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.forged trailers.drops model-supplied Signed-off-by / Co-authored-by / Closes / Fixes lines",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.forged trailers.CONTROL: BREAKING CHANGE and Refs footers from the model are kept",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.forged trailers.CONTROL: the user-supplied -CoAuthor still produces exactly one Co-authored-by footer",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.terminal escape sequences and control characters.Normalize-Message strips ESC / BEL / C1 control characters from subject and bullets",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.terminal escape sequences and control characters.a model reply containing escape sequences never reaches the commit (end to end, -Yes)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B07-UntrustedModelOutput.Tests.ps1",
+    "Name": "B7: model output and file names are treated as untrusted.terminal escape sequences and control characters.-ListAi does not print raw escape sequences found in file names",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.done_reason \"length\" (output cut at -NumPredict) is not committed with -Yes",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.a stream that ends without a final done:true is not committed with -Yes",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.a malformed NDJSON line in the middle of the stream is not silently dropped into a committed message",
+    "Result": "Passed",
+    "Tags": "Spec",
+    "Error": []
+  },
+  {
+    "File": "B08-TruncatedStream.Tests.ps1",
+    "Name": "B8: an incomplete model stream is never auto-committed.CONTROL: a complete stream (done:true, done_reason stop) is committed with -Yes",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "B13-SetextFalsePositive.Tests.ps1",
+    "Name": "B13: conflict-marker detection.a setext heading underline (=======) in Markdown is not a conflict marker",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "B13-SetextFalsePositive.Tests.ps1",
+    "Name": "B13: conflict-marker detection.CONTROL: a real conflict block with all three marker lines is still detected",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.a value of the wrong type is reported and ignored, aic keeps running",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.a misspelled key is reported with a suggestion",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.an invalid value for an enum key is reported",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.an out-of-range number is reported (and still clamped, as before)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.-ConfigValidate on a good config says so, exits 0 and never contacts Ollama",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.-ConfigValidate on a bad config lists every problem and exits 1",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.scope enforcement is case-sensitive (\"Auth\" is not \"auth\")",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C01-Config.Tests.ps1",
+    "Name": "C1: configuration is validated, never crashes, never silently ignored.CONTROL: unreadable JSON is a warning, aic still runs",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.-DryRun: exit 0 and nothing on the pipeline",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.-Yes commit: exit 0 and git's commit summary does not leak into the pipeline",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.-Yes -PassThru: the pipeline is exactly the commit message",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.blocked by the secret scan: exit 3",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.incomplete model stream under -Yes: exit 3",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.Ollama not reachable: exit 4",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.model not installed: exit 4",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.generation failure (HTTP 500): exit 1",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.not inside a git repository: exit 1",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C02-ExitCodesPipeline.Tests.ps1",
+    "Name": "C2: exit codes and a clean pipeline.nothing staged: exit 5",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.-Push with a single remote that is not called origin pushes to it and sets the upstream",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.-Push with several remotes and no upstream does not guess: it names the remotes and pushes nowhere",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.-Amend on a commit that is already on the remote warns that history is being rewritten",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.CONTROL: -Amend on a local-only commit does not warn",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C03-PushAmend.Tests.ps1",
+    "Name": "C3: push and amend guards.CONTROL: -Push to origin with an upstream already set keeps working",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.bases the bump on the HIGHEST semver tag reachable from HEAD, not the nearest one",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.bumping from a prerelease releases that version (v1.2.3-rc.1 + fix -> v1.2.3)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.ignores tags that are not semantic versions",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.prose that merely mentions BREAKING CHANGE is not a breaking change",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.refuses to bump in a shallow clone (history is incomplete)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.refuses -Push when the tag already exists on the remote, and creates no local tag",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.-Changelog lists a BREAKING CHANGE footer under \"Breaking changes\"",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.CONTROL: a BREAKING CHANGE footer makes a major bump",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.CONTROL: \"feat!:\" makes a major bump; build metadata (v1.2.3+b5) bumps the patch",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C04-BumpChangelog.Tests.ps1",
+    "Name": "C4: -Bump and -Changelog.CONTROL: -Bump -Yes -Push pushes the new tag",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.a secret value inside a diff is replaced by a marker before the prompt is built (and still reported)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.two secrets on one line are both redacted",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.the content of a credential file (.env) is omitted, only its name is sent",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.-Review redacts as well",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.-Pr redacts the branch diff",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.CONTROL: a lockfile token is not in the prompt (lockfiles are hidden from the model)",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.warns when the endpoint is not on this machine (plain http AND https)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C05-PromptSafety.Tests.ps1",
+    "Name": "C5: secrets never reach the model prompt.does not claim \"zero tokens left the building\" for a remote endpoint",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a year-like branch prefix (2024-refactor) is not an issue number",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a date-like branch prefix (12-05-cleanup) is not an issue number",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a CVE id (fix/CVE-2024-1234) is not cut into a bogus ticket key",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.CONTROL: feat/ABC-123-login still gives Refs ABC-123",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.CONTROL: 42-fix-header still gives #42",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.CONTROL: issue-42 still gives #42",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.a commit that only changes a lockfile can still be written",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C06-RefsAndLockfiles.Tests.ps1",
+    "Name": "C6: auto-ref and lockfile-only commits.an empty index is still \"nothing to commit\" (exit 5), the lockfile fallback does not invent a commit",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr never repeats testing claims made by the model",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr states which test files changed (evidence) and that aic did not run them",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr says plainly when no test file changed",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Pr warns when the model stream was cut off",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Review.discloses that only part of a large diff was reviewed, and never claims a clean bill of health for all of it",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Review.warns when the review stream ended before the model finished",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C07-ReviewAndPr.Tests.ps1",
+    "Name": "C7: -Pr and -Review report only what is verified.-Review.CONTROL: a small diff is reviewed without any coverage warning",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.proxy.a proxy in the environment does not break calls to a local Ollama (tags, show and chat all bypass it)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.HTTP 503 followed by success: one retry, the commit is made exactly once",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.a connection that dies before the first byte is retried",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.gives up after 2 retries (3 requests in total) and reports the failure",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.CONTROL: \"model not found\" (404) is not retried and tells you what to pull",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.transient failures are retried, everything else is not.CONTROL: a client error (400) is not retried",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.timeout and cancellation.a stalled stream times out, is not retried, commits nothing and leaves no connection open",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.reporting.reports first-token latency next to the speed",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.context window.never asks for more context than the model has, and shortens the diff to fit",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.context window.CONTROL: without a known context length nothing is clamped or shortened",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.thinking models and empty answers (existing behaviour).CONTROL: a thinking-capable model is called with think:false",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.thinking models and empty answers (existing behaviour).CONTROL: a model that only thinks is reported, not committed",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C08-OllamaReliability.Tests.ps1",
+    "Name": "C8: Ollama reliability.thinking models and empty answers (existing behaviour).CONTROL: an empty answer is reported, not committed",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.an OpenAI-compatible server works: models from /v1/models, answer streamed over /v1/chat/completions, no Ollama endpoints touched",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.an answer cut off by the server (finish_reason length) is not auto-committed",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.a stream that never reaches [DONE] is not auto-committed",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.a model the server does not offer is reported (exit 4)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.an error object from the server is shown as text",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.AIC_API_KEY is sent as a Bearer token and never printed",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.no key configured: no Authorization header is sent",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.\"provider\" in .aic.json selects the provider; an unknown provider is reported by -ConfigValidate",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9: providers.CONTROL: Ollama is still the default provider",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.fast = small, balanced = about 7B, quality = the largest model that is still practical (not the 70B)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.a single installed model is every profile; embedding models are never recommended",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.balanced picks the model closest to 7B, prefers a coder model on a tie, and estimates parameters from the size when the name has none",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-Profile fast / balanced / quality choose the model",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-Profile fast / balanced / quality choose the model",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-Profile fast / balanced / quality choose the model",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.an explicit -Model beats -Profile",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.\"profile\" in .aic.json is used when no model is configured, and \"model\" wins when both are",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C09-ProvidersAndProfiles.Tests.ps1",
+    "Name": "C9b: model profiles and recommendations.end to end.-ListModels shows size, estimated parameters and which profile each model is recommended for, without generating anything",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.a finding whose evidence is in the diff is verified, and its line number is derived from the diff",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.a wrong line number from the model is replaced by the real one",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.quoted code that is not in the diff makes the finding unverified and removes its line number",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.a finding about a file that is not in the diff is dropped and counted",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.severities are normalised (Critical, LOW, anything else = info) and sorted most severe first",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewSeverity high keeps only high and critical and says how many were filtered",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.an empty list means \"no problems found\", still marked advisory",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.free-text bullets from a model that ignores the format are passed on as unverified notes, never as findings",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewJson keeps stdout clean (the interface goes to stderr) and the pipeline holds exactly one JSON document",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.reports how much of the diff was reviewed",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewMarkdown produces a document with severity, file:line, the advisory notice and the no-tests statement",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.the interactive card shows the severity and whether a finding is verified",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.tells the model that the diff is untrusted data and asks for JSON",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewJson together with -ReviewMarkdown is a usage error (exit 2)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewDiff  reviews the branch against a ref and never touches the index",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.-ReviewDiff with an unknown ref is reported",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "C10-StructuredReview.Tests.ps1",
+    "Name": "C10: structured review.CONTROL: the old free-text review still works (bullets, \"no problems found\")",
+    "Result": "Passed",
+    "Tags": "Control",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.harness sanity: -DryRun reaches the preview, talks to the mock only, commits nothing",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-Yes commits the staged change with the generated message",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-Yes -Type fix -Scope api forces the header",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-All -Yes stages everything and commits it",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-DryRun -PassThru returns the message on the pipeline",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.-Undo -Yes soft-undoes the last commit and keeps the changes staged",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: end to end.a repo-level .aic.json overrides ~/.aic.json, and a typed flag overrides both",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Normalize-Message strips fences, think-blocks and preamble, lower-cases the subject, drops the trailing dot",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Test-Message accepts a valid header and rejects bad / over-long ones",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Test-AiPath recognises AI tooling files and ignores ordinary source",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Find-Secrets flags an AWS key, a private-key file and .env, but not .env.example or placeholders",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Get-Changes reports a partially staged file as Staged AND Dirty, and untracked files as unstaged",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: pure logic.Find-Leftovers reports console.log in JS and a TODO, without blocking",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: AI-file staging.Stage-AiFiles stages an untracked AI file and leaves a non-AI file alone",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: AI-file staging.Limit-ToAi (-AiOnly) unstages a plain non-AI file and keeps it in the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Baseline.Tests.ps1",
+    "Name": "Baseline: AI-file staging.Select-Files stages a newly ticked unstaged file",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.a commit keeps the skip-worktree flag of an unrelated file",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.committing a partially staged file commits only the staged hunk and keeps the rest in the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.-Amend -Yes rewrites the message of the last commit without adding a commit",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.-AiOnly -Yes commits only the AI file and leaves the other change in the working tree",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.works inside a linked worktree (its own index lives under .git/worktrees)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Compat.Tests.ps1",
+    "Name": "Compat: index-touching flows.the very first commit of an unborn repository works (no HEAD, no index file before staging)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree refuses to run while the index has unmerged entries",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree + read-tree loses intent-to-add (git add -N) entries",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree + read-tree resets skip-worktree and assume-unchanged flags",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.write-tree + read-tree discards the resolve-undo extension (git checkout -m / update-index --unresolve)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.a byte copy of the index file restores ALL of those states exactly",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.git status rewrites the index file (stat refresh): raw hashes cannot detect user changes, the semantic fingerprint can",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "git facts: why `git write-tree` is NOT a complete index backup.a linked worktree has its own index outside the main .git directory (use rev-parse --git-path index)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.restores partial staging, skip-worktree flags and untracked state when the index is still what aic left",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.REFUSES to restore when the user changed the index after aic did",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.REFUSES to restore while another git process holds index.lock, and leaves that lock alone",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "IndexBackup.Characterization.Tests.ps1",
+    "Name": "prototype: restore-safety rules for an index snapshot.REFUSES to restore when HEAD moved (e.g. a commit happened in between)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.docs/PARAMETERS.md and docs/CONFIGURATION.md are exactly what tools/Update-Docs.ps1 generates from the code",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.every parameter has help text in aic.ps1 and appears in the parameter reference",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.every .aic.json key of the schema is documented, and nothing else is",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.every \"aic -Flag\" used in the documents is a real parameter or alias",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.every JSON example in the documents is a valid configuration (checked by aic -ConfigValidate)",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.the exit codes in the README are the ones aic documents in its own help",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.the keyboard reference lists every key of the review prompt",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  },
+  {
+    "File": "Docs.Tests.ps1",
+    "Name": "Docs: the documentation matches the implementation.relative links in the documents point to files that exist",
+    "Result": "Passed",
+    "Tags": "",
+    "Error": []
+  }
+]

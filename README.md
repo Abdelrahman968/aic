@@ -1,381 +1,117 @@
-<div align="center">
+# aic: AI commit messages from a local model
 
-# ✦ aic
+`aic` is a PowerShell 7+ command that reads your staged changes and writes a **Conventional Commit** message with a model that runs on **your own machine** (Ollama by default). You review the message with a single key, then commit. No cloud service, no API key, no telemetry: the only network traffic goes to the model server address you configure.
 
-**AI Commit — Conventional Commit messages written by a _local_ Ollama model.**
+It also reviews diffs, writes pull-request text, changelogs, release tags and commit statistics, and has guard rails around your Git index (see [Security and privacy](docs/SECURITY.md)).
 
-Stage → `aic` → review with one key → commit. Nothing leaves your machine.
+> **Status: release candidate, not "production-ready".** The automated suite (Pester 5, mock model servers, temporary Git repositories) passes completely on Linux with PowerShell 7.4. Windows and macOS, the interactive key handling, and real LM Studio / llama.cpp servers have **not** been tested. See [Known limitations](#known-limitations).
 
-![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-5391FE?logo=powershell&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-000000?logo=ollama&logoColor=white)
-![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)
-![Privacy](https://img.shields.io/badge/100%25-local%20%26%20private-2ea44f)
+## Requirements
 
-[Install](#-install) · [Quick start](#-quick-start) · [AI files](#-ai-files-staging) · [Review keys](#-review-keys) · [Config](#-configuration) · [Parameters](#-parameters)
+* PowerShell 7 or newer, `git` in `PATH`
+* [Ollama](https://ollama.com) with at least one chat model, e.g. `ollama pull qwen2.5-coder:7b` (or an OpenAI-compatible local server, see [docs/OLLAMA.md](docs/OLLAMA.md))
 
-</div>
+## Install
 
-<!-- Add a screenshot or GIF here: ![aic demo](docs/demo.gif) -->
-
----
-
-## ✨ Features
-
-- **Local & private** — your diff goes to an Ollama server on your own machine, nowhere else.
-- **Conventional Commits** — output is validated (`type(scope): subject`, max 72 chars) with automatic retry when the format is wrong.
-- **One-key review** — commit, edit, retry, pick a model, change type/scope, copy, push, all without leaving the prompt.
-- **AI-file staging** — `git add` only the prompts, agent rules and AI configs you changed (`CLAUDE.md`, `.cursorrules`, `prompts/`, …).
-- **File checklist** — nothing staged? Pick exactly which files go into the commit.
-- **Message variants** — generate several alternatives and choose with the arrow keys.
-- **Live UI** — spinner, token progress bar, colour-coded diffstat, subject-length gauge, type pills.
-- **Secret scan** — warns about `.env` files, private keys, tokens and database URLs before you commit.
-- **Built-in checks** — flags leftover `console.log`, `debugger`, `.only`, `TODO`, merge-conflict markers and files over 1 MB (no AI involved).
-- **AI review** — press `w` for a quick, advisory review of the staged diff by your local model.
-- **Beyond commits** — PR descriptions (`-Pr`), changelogs (`-Changelog`), semver bumps + tags (`-Bump`), branch names (`-NewBranch`) and commit stats (`-Stats`).
-- **Auto refs** — `feat/ABC-123-login` automatically adds `Refs: ABC-123`.
-- **Customisable** — 10 themes, 8 spinners, 4 border styles, 3 banners, per-repo and global settings.
-- **Extras** — `-Undo`, `-Amend`, `-Push`, `-Doctor`, `-Log`, gitmoji, Arabic/any-language messages.
-
----
-
-## 📦 Requirements
-
-| Tool | Notes |
-|---|---|
-| [PowerShell 7+](https://github.com/PowerShell/PowerShell) | Windows Terminal / VS Code terminal recommended |
-| [Git](https://git-scm.com/) | any recent version |
-| [Ollama](https://ollama.com/) | running locally (or reachable via `-OllamaUrl`) |
-| A model | e.g. `ollama pull qwen2.5-coder:7b` (default) or a lighter `qwen2.5-coder:3b` |
-
----
-
-## 🚀 Install
+`aic.ps1` defines one function, `aic`. Load it from your profile:
 
 ```powershell
-# 1. Get the script
-git clone https://github.com/abdelrahman968/aic.git "$HOME\aic"
-
-# 2. Load it from your profile
-notepad $PROFILE
+# in $PROFILE
+. C:\tools\aic\aic.ps1
 ```
 
-Add this line to your `$PROFILE`:
-
-```powershell
-. "$HOME\aic\aic.ps1"
-```
-
-Reload the profile (or open a new terminal) and check everything:
-
-```powershell
-. $PROFILE
-aic -Doctor
-```
-
-> **Tip:** you can also paste the `aic` function directly into `$PROFILE` instead of dot-sourcing the file.
-
-Optional defaults, also in `$PROFILE`:
+Defaults once, in `$PROFILE` (any parameter works this way):
 
 ```powershell
 $PSDefaultParameterValues['aic:Model'] = 'qwen2.5-coder:3b'
 $PSDefaultParameterValues['aic:Theme'] = 'dracula'
 ```
 
----
+Run `aic -Doctor` to check PowerShell, git, the server, the model and your settings.
 
-## ⚡ Quick start
-
-```powershell
-aic                    # pick files if nothing is staged → generate → review → commit
-aic -AiFiles           # stage changed AI files, then generate
-aic -All -Push         # git add -A, commit, push
-aic -DryRun            # preview only, commit nothing
-aic -Undo              # soft-undo the last commit (changes stay staged)
-aic -Log 12            # pretty history with type pills
-aic -Doctor            # health check
-```
-
----
-
-## 🤖 AI files staging
-
-Stage only the files that configure or steer AI tools — without touching the rest.
-
-| Command | What it does |
-|---|---|
-| `aic -AiFiles` | `git add` every changed AI-related file, then generate → review → commit |
-| `aic -AiOnly` | commit **only** AI files (other staged files are unstaged after confirmation; your working tree is untouched) |
-| `aic -ListAi` | list changed AI files and whether they are `staged`, `partial` or `unstaged` |
-| `aic -AiPattern 'agents/*','*.skill.md'` | add your own globs |
-
-**Detected automatically**
-
-```text
-.aic.json                    CLAUDE.md  AGENTS.md  GEMINI.md  COPILOT.md  QWEN.md  CODEX.md
-.cursorrules  .windsurfrules  .clinerules  .aider*
-.claude/  .cursor/  .continue/  .windsurf/  .roo/  .cline/  .codex/  .gemini/  .ollama/  .tabby/  .agents/
-.github/copilot-instructions.md  .github/{instructions,prompts,chatmodes,agents}/
-mcp.json  .mcp.json  .vscode/mcp.json
-Modelfile  llms.txt  llms-full.txt
-prompts/  *.prompt.md  *.prompty  *.mdc  skills/*/SKILL.md
-```
-
-aider's scratch files (`.aider.chat.history.md`, `.aider.input.history`, `.aider.tags.cache`) are intentionally ignored.
-
-In the checklist AI files carry a purple `AI` tag and the **`i`** key ticks them all. When every staged file is AI-related, the model is nudged towards `chore(ai): …`.
-
-Make it automatic per repo with `"autoStageAi": true` in `.aic.json`.
-
----
-
-## ⌨️ Review keys
-
-| Key | Action |
-|---|---|
-| `Enter` | commit |
-| `e` | commit, but edit the message in your git editor first |
-| `r` | retry (new message, same settings) |
-| `v` | generate variants and pick one |
-| `h` | retry with a hint you type |
-| `m` | pick another model |
-| `t` | pick the commit type |
-| `s` | set / pick the scope |
-| `b` | toggle breaking-change `!` |
-| `x` | toggle gitmoji |
-| `a` | stage AI files and regenerate |
-| `f` | re-pick files and regenerate |
-| `w` | advisory AI review of the staged diff |
-| `c` | copy message to clipboard |
-| `p` | commit and push |
-| `d` | view the staged diff |
-| `q` / `Esc` | quit without committing |
-
-`Esc` during generation cancels it (the previous message is kept).
-In pickers: `↑`/`↓` or `j`/`k`, `Home`/`End`, `Enter`, `Esc`. In the checklist: `Space` toggle, `a` all, `n` none, `i` AI files.
-
----
-
-## 🧰 More tools
-
-| Command | What it does |
-|---|---|
-| `aic -Review` | local model reviews the staged diff (bugs, risks, leftovers) and exits. Advisory only. |
-| `aic -Pr -Into main` | PR title + markdown description (Summary / Changes / Testing) from the commits on your branch. `-Copy` copies it. |
-| `aic -Changelog -Since v1.2.0` | changelog grouped by commit type, breaking changes first. Defaults to "since the last tag". |
-| `aic -Bump` | suggests the next semantic version from your commits and offers to create the annotated tag (`-Push` pushes it). |
-| `aic -Stats -Days 60` | sparkline of your rhythm, current streak, busiest day, top types and scopes. |
-| `aic -NewBranch` | the model names a branch (`type/short-description`), you confirm, then the normal commit flow continues. |
-| `aic -CoAuthor 'Name <mail>'` | adds a `Co-authored-by:` footer. |
-
-**Built-in checks** run on the added lines of the staged diff and show up under the diffstat: `console.log`, `debugger`,
-`.only(`, `TODO`/`FIXME`, merge-conflict markers and files over 1 MB. Conflict markers block `-Yes` and ask before a normal
-commit. Disable everything with `-NoLint` or `"lint": false`.
-
-**Auto refs**: a ticket key (`ABC-123`) or issue number in the branch name (`feat/ABC-123-login`, `42-fix-header`, `issue-42`)
-becomes a `Refs:` footer. Disable with `-NoAutoRef` or `"autoRef": false`.
-
----
-
-## 🛠 Configuration
-
-Create a starter file for the current repo:
+## Quick start
 
 ```powershell
-aic -Init
+git add -p                  # stage what you want in this commit
+aic                         # generate, review with one key, commit
 ```
 
-`.aic.json` (repo root) and `~/.aic.json` (personal defaults) support:
-
-```json
-{
-  "model": "qwen2.5-coder:7b",
-  "language": "English",
-  "bullets": 3,
-  "history": 3,
-  "emoji": false,
-  "theme": "ocean",
-  "spinner": "dots",
-  "border": "rounded",
-  "banner": "mini",
-  "width": 78,
-  "scopes": ["auth", "ui", "api", "ai"],
-  "exclude": ["*.svg"],
-  "aiFiles": ["prompts/*", "*.prompt.md"],
-  "autoStageAi": false,
-  "lint": true,
-  "autoRef": true,
-  "coAuthor": ""
-}
-```
-
-**Precedence** (highest first):
-
-1. flag you type
-2. `$PSDefaultParameterValues`
-3. `.aic.json` in the repo
-4. `~/.aic.json`
-5. built-in default
-
-If `scopes` is set, the model is restricted to them and anything else shows up as a note on the message card.
-
----
-
-## 🎛 Parameters
-
-<details>
-<summary><b>Model & generation</b></summary>
-
-| Parameter | Default | Description |
-|---|---|---|
-| `-Model` | `qwen2.5-coder:7b` | Ollama model (tab-completes installed models) |
-| `-OllamaUrl` | `$env:OLLAMA_HOST` / `http://localhost:11434` | server address |
-| `-MaxChars` | `6000` | diff cap, shared fairly between files |
-| `-NumCtx` | `4096` | context window (auto-raised when needed) |
-| `-NumPredict` | `256` | max answer tokens |
-| `-Temperature` | `0.2` | rises a little on every retry |
-| `-KeepAlive` | `10m` | how long Ollama keeps the model loaded |
-| `-TimeoutSec` | `180` | whole-generation timeout |
-| `-StartOllama` | off | start `ollama serve` automatically |
-| `-Unload` | off | free the model from (V)RAM when done |
-
-</details>
-
-<details>
-<summary><b>Message shape</b></summary>
-
-| Parameter | Description |
-|---|---|
-| `-Type` | force the type (`feat`, `fix`, `refactor`, `perf`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`) |
-| `-Scope` | force the scope |
-| `-Breaking` | mark as breaking: `type(scope)!:` |
-| `-Emoji` | gitmoji after the colon |
-| `-Hint` | extra context for the model |
-| `-Language` | language of subject + bullets (type/scope stay English) |
-| `-Bullets` | max body bullets, `0`–`6` (`0` = subject only) |
-| `-History` | recent commit subjects shown as style reference, `0`–`20` |
-| `-Ref '#42'` | adds a `Refs: #42` footer |
-| `-Exclude` | extra pathspecs hidden from the model |
-| `-Retries` | automatic retries on format failure, `0`–`5` |
-| `-Variants` | alternatives generated by `v`, `2`–`6` |
-| `-NoScan` | skip the secret scan |
-
-</details>
-
-<details>
-<summary><b>Staging</b></summary>
-
-| Parameter | Description |
-|---|---|
-| `-All` | `git add -A` first |
-| `-AiFiles` | `git add` every changed AI-related file |
-| `-AiOnly` | commit only AI-related files |
-| `-AiPattern` | extra globs counted as AI-related |
-| `-ListAi` | list changed AI files and exit |
-| `-Pick` | show the file checklist even if something is staged |
-
-</details>
-
-<details>
-<summary><b>Actions & output</b></summary>
-
-| Parameter | Description |
-|---|---|
-| `-Amend` | rewrite the last commit's message |
-| `-Push` | push after committing (sets upstream on new branches) |
-| `-NoVerify` | skip git hooks |
-| `-Signoff` | add `Signed-off-by` |
-| `-Undo` | soft-undo the last commit and exit |
-| `-Init` | write a starter `.aic.json` and exit |
-| `-Doctor` | health check and exit |
-| `-Log N` | last `N` commits as coloured pills and exit |
-| `-ListThemes` | preview all themes and exit |
-| `-Yes` | commit without asking (refuses on secret warnings or format problems) |
-| `-DryRun` | show the message, commit nothing |
-| `-Copy` | copy the message, commit nothing |
-| `-PassThru` | also return the message as a string |
-
-</details>
-
-<details>
-<summary><b>Review, release & insight tools</b></summary>
-
-| Parameter | Description |
-|---|---|
-| `-Review` | advisory AI review of the staged diff, then exit |
-| `-Pr` / `-Into` | PR title + description; `-Into` sets the target branch (default: origin's default branch) |
-| `-Changelog` / `-Since` | changelog grouped by type, since a ref (default: latest tag) |
-| `-Bump` | suggest the next semver and offer to tag it |
-| `-Stats` / `-Days` | commit statistics for the last `1`–`365` days (default `30`) |
-| `-NewBranch` | model-suggested branch name, created after confirmation |
-| `-CoAuthor` | `Co-authored-by:` footer |
-| `-NoLint` | skip the built-in leftover / conflict-marker / large-file checks |
-| `-NoAutoRef` | do not derive `Refs:` from the branch name |
-
-</details>
-
-<details>
-<summary><b>Look & feel</b></summary>
-
-| Parameter | Values |
-|---|---|
-| `-Theme` | `ocean` `sunset` `forest` `neon` `mono` `aurora` `rose` `gold` `dracula` `candy` |
-| `-Spinner` | `dots` `arc` `bounce` `pulse` `grow` `line` `star` `orbit` |
-| `-Border` | `rounded` `square` `double` `heavy` |
-| `-Banner` | `mini` `big` `none` |
-| `-Width` | `50`–`140` (default `78`) |
-| `-Bell` | ring the terminal bell after a successful commit |
-| `-NoAnim` | keep colours, drop animations |
-| `-Plain` | ASCII only, no colour, no animation (automatic when output is redirected or `NO_COLOR` is set) |
-
-</details>
-
----
-
-## 🧪 Examples
+Nothing staged? In an interactive terminal `aic` shows a checklist. A few more:
 
 ```powershell
-aic -DryRun -Type fix -Scope auth          # force "fix(auth): ..."
-aic -Model qwen2.5-coder:3b -Yes           # lighter model, no questions asked
-aic -Amend -Hint "mention the retry logic" # reword the last commit
-aic -Language Arabic                       # Arabic subject + bullets
-aic -Theme dracula -Border double -Banner big -Spinner star
-$msg = aic -DryRun -PassThru               # use the message in your own scripts
+aic -DryRun                       # preview only, commit nothing
+aic -All -Yes                     # git add -A, commit without asking
+aic -Model qwen2.5-coder:3b -Hint "mention the retry logic"
+aic -Profile fast                 # pick the installed model that fits: fast | balanced | quality
+aic -ListModels                   # installed models, size, which profile each fits
+aic -Amend                        # rewrite the message of the last commit
+aic -Undo                         # soft-undo the last commit (changes stay staged)
+aic -AiFiles                      # stage changed AI-tooling files (prompts, agent rules ...)
+aic -NewBranch                    # the model names a branch for the staged changes
 ```
 
----
+Review, PR, release and history tools:
 
-## 🔐 Privacy
+```powershell
+aic -Review                       # advisory review of the staged diff
+aic -ReviewDiff main              # review everything on this branch against main
+aic -ReviewSeverity high          # only findings at or above a level
+aic -Pr -Into main                # PR title + description from this branch
+aic -Changelog -Since v1.2.0      # changelog grouped by commit type
+aic -Bump -Push                   # next SemVer from your commits, tag it, push the tag
+aic -Log 12                       # last 12 commits as type pills
+aic -Stats -Days 60               # commit statistics
+```
 
-- The diff is sent only to the Ollama address you configure (default `localhost`).
-- The secret scan runs locally and only **warns**; with `-Yes` it refuses to commit when something suspicious is staged.
-- Lockfiles and minified/generated files (`package-lock.json`, `yarn.lock`, `*.min.js`, `*.map`, …) are never sent to the model.
+For scripts (the interface goes to stderr, the document is the only output):
 
----
+```powershell
+$review = aic -ReviewJson | ConvertFrom-Json
+$msg    = aic -DryRun -PassThru
+aic -ReviewMarkdown > review.md
+```
 
-## ❓ Troubleshooting
+Keys at the review prompt: see [docs/KEYBOARD.md](docs/KEYBOARD.md).
 
-| Problem | Fix |
+## Exit codes
+
+aic leaves its result in `$LASTEXITCODE` when it finishes:
+
+| Code | Meaning |
 |---|---|
-| `Can't reach Ollama` | open the Ollama app, run `ollama serve`, or use `-StartOllama` / `-OllamaUrl` |
-| `Model '…' is not installed` | `ollama pull <model>` or pick one in the prompt |
-| Garbled colours / glyphs | use Windows Terminal and PowerShell 7+, or run with `-Plain` |
-| Pickers don't appear | they need an interactive terminal; run `aic -Doctor` to see which capabilities are detected |
-| Model "thinks" forever | raise `-NumPredict` or use a non-reasoning model |
+| 0 | success |
+| 1 | error (not a repository, generation failed, commit or push failed ...) |
+| 2 | usage error (`-ReviewJson` together with `-ReviewMarkdown`) |
+| 3 | blocked by a safety check (secrets, conflict markers, incomplete model output under `-Yes`, unresolved merge, the index changed while aic was running) |
+| 4 | the model server or the model is unavailable |
+| 5 | nothing to commit / nothing to release |
+| 130 | cancelled |
 
----
+## What it protects you from
 
-## 🤝 Contributing
+* **Your staging is never rewritten behind your back.** aic works on a private copy of the index and only replaces the real one right before committing, and only if nothing changed in the meantime. A run that ends without a commit (`-DryRun`, `-Review`, an error, `q`) leaves your index exactly as it was.
+* **Secrets** in staged content are detected (including in files you excluded from the model), `-Yes` refuses to commit them, and secret values and credential files are redacted from what the model sees.
+* **Repository content is untrusted**: terminal escape sequences are stripped, forged commit trailers are dropped, and review findings are checked against the diff before they are shown.
+* No hard resets, cleans, force pushes or branch deletions, ever. Details and limits: [docs/SECURITY.md](docs/SECURITY.md).
 
-Issues and pull requests are welcome. If you add a new AI-tool file pattern, put it in the `$aiRx` list inside `aic.ps1` and mention it in this README.
+## Documentation
 
-## 📄 License
+| | |
+|---|---|
+| [docs/PARAMETERS.md](docs/PARAMETERS.md) | every parameter (generated from the code) |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | `.aic.json` keys, environment variables |
+| [docs/OLLAMA.md](docs/OLLAMA.md) | Ollama and OpenAI-compatible servers, model profiles, retries, context |
+| [docs/KEYBOARD.md](docs/KEYBOARD.md) | keyboard reference |
+| [docs/SECURITY.md](docs/SECURITY.md) | security and privacy |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | messages and what to do |
+| [docs/MIGRATION.md](docs/MIGRATION.md) | what changed compared with the original script |
+| [CHANGELOG.md](CHANGELOG.md) | release notes |
+| [tests/README.md](tests/README.md) | how to run the test suite |
 
-Add a `LICENSE` file of your choice (MIT is a common default).
+## Known limitations
 
----
-
-<div align="center">
-
-Made by [**@abdelrahman968**](https://github.com/abdelrahman968)
-
-</div>
+* Tested on Linux, PowerShell 7.4, Git 2.43, against in-process mock servers. **Not tested** on Windows or macOS, with a real terminal's key handling, or against real LM Studio / llama.cpp servers.
+* Secret detection is pattern-based. It will miss secrets that look like ordinary text; do not treat it as a guarantee.
+* A "verified" review finding means the quoted code is in the diff. It does not mean the model's claim about that code is right.
+* The `-Model` tab-completer queries the server directly and is not covered by the proxy bypass.
+* Large repositories: every run starts several git processes; performance on very large repositories has not been measured.
